@@ -1,0 +1,8 @@
+#!/bin/bash
+
+GIT_REPO="https://github.com/jgamblin/compare.git"
+GIT_FILE="compare.py"
+
+#git archive --remote=$GIT_REPO HEAD: -- $GIT_FILE | tar -x
+
+wget -O $GIT_FILE https://raw.githubusercontent.com/jgamblin/compare/master/compare.py

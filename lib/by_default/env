@@ -1,0 +1,4 @@
+mys_path_append "/usr/local/bin" "/usr/local/sbin"
+
+
+alias l="ls -al"

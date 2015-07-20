@@ -1,0 +1,121 @@
+# use strict
+# vim: ft=sh
+set -u
+
+# Configuration
+typeset MYSHELL_HUB="https://github.com/saruspete/myshell.git"
+typeset MYSHELL_DIR="$HOME/.myshell"
+typeset MYSHELL_LIB="$MYSHELL_DIR/lib"
+typeset MYSHELL_BIN="$MYSHELL_DIR/bin"
+typeset MYSHELL_EXT="$MYSHELL_DIR/home"
+typeset MYSHELL_LCK="$MYSHELL_DIR/.initialized"
+
+# #####################################
+# Helper subs
+
+function mys_merge {
+	typeset dst="$1"
+	typeset add="$2"
+	
+	# Best copy tool available
+	typeset copy="cp -a"
+	mys_isavail "rsync" && copy="rsync -a"
+
+	# If target file exists, try to merge files
+	if [[ -e "$dst" ]]; then
+			$copy "$filedst" "$filedst.mys.$(date +'%y%m%d_%H%M%S')"
+			cat "$filesrc" >> "$filedst"
+	# Not existing, just copy it
+	else
+		$copy "$filesrc" "$filedst"
+	fi
+}
+
+function mys_isavail {
+	type $1 >/dev/null 2>&1
+}
+
+# update from origin
+function mys_update {
+	mys_isavail "git" || return 1
+	
+	if [[ -e "$MYSHELL_DIR/.git" ]]; then
+		git -C "$MYSHELL_DIR" pull
+	else
+		git clone "$MYSHELL_HUB" "$MYSHELL_DIR"
+	fi
+}
+
+# sync and send to another local hosts
+function mys_sync {
+	typeset hosts="$@"
+}
+
+
+# Load 
+function mys_loadmod {
+	typeset mod="$1"
+	typeset val="$2"
+
+	for file in $MYSHELL_LIB/by_$mod/$val; do
+		[[ -e "$file" ]] || continue
+		. "$file"
+	done
+}
+
+function mys_path_append {
+
+	for newpath in $@; do
+	echo "RAAAH $newpath"
+		OIFS="$IFS"
+		IFS=":"
+		for p in $PATH; do
+			[[ "$newpath" == "$p" ]] && {
+				IFS="$OIFS"
+				continue 2
+			}
+		done
+		IFS="$OIFS"
+		export PATH="$PATH:$newpath"
+		echo "Appended $newpath"
+	done
+}
+
+
+# #####################################
+# Main processing
+
+# Load external configuration files
+[[ -e "$MYSHELL_LCK" ]] || {
+	echo "MyShell: Initializing local configuration files"
+	typeset filesrc=""
+	shopt -s dotglob
+	for src in $MYSHELL_EXT/*; do
+		[[ -e "$src" ]] || continue
+
+		typeset dst="$HOME/${filesrc#$MYSHELL_EXT/}"
+		mys_merge "$dst" "$src"
+	done
+	shopt -u dotglob
+
+	date +'%y%m%d_%H%M%S' >| "$MYSHELL_LCK"
+}
+
+# Add custom binaries to PATH
+mys_path_append "$MYSHELL_BIN"
+
+
+# Load per-shell definitions
+typeset mys_custom="$MYSHELL_DIR/myshell.${0##*/}"
+if [[ -e "$mys_custom" ]]; then
+	. "$mys_custom"
+else
+	echo "No custom file found for shell $0"
+fi
+
+# Load custom modules
+mys_loadmod "default" "*"
+mys_loadmod "os" "$(uname -s)"
+mys_loadmod "shell" "${0##*/}"
+mys_loadmod "host" "$(uname -n)"
+mys_loadmod "user" "$(id -nu)"
