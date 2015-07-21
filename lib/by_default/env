@@ -2,7 +2,7 @@
 mys_path_append "/usr/local/bin" "/usr/local/sbin"
 
 # VIM FTW
-mys_isavail "vim" && export PAGER="vim"
+mys_isavail "vim" && export EDITOR="vim"
 
 # Aliases cause I'm lazy
 alias l="ls -al"
