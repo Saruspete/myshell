@@ -133,7 +133,7 @@ mys_path_append "$MYSHELL_BIN"
 # Load per-shell definitions
 typeset mys_custom="$MYSHELL_DIR/myshell.${0##*/}"
 if [[ -e "$mys_custom" ]]; then
-	. "$mys_custom"
+	source "$mys_custom"
 else
 	echo "MyShell: No custom file found for shell $0"
 fi

@@ -1,4 +1,8 @@
+# Some default path
 mys_path_append "/usr/local/bin" "/usr/local/sbin"
 
+# VIM FTW
+mys_isavail "vim" && export PAGER="vim"
 
+# Aliases cause I'm lazy
 alias l="ls -al"
