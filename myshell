@@ -8,27 +8,41 @@ typeset MYSHELL_DIR="$HOME/.myshell"
 typeset MYSHELL_LIB="$MYSHELL_DIR/lib"
 typeset MYSHELL_BIN="$MYSHELL_DIR/bin"
 typeset MYSHELL_EXT="$MYSHELL_DIR/home"
+typeset MYSHELL_LOC="$MYSHELL_DIR/local"
 typeset MYSHELL_LCK="$MYSHELL_DIR/.initialized"
 
 # #####################################
 # Helper subs
 
 function mys_merge {
-	typeset dst="$1"
-	typeset add="$2"
-	
-	# Best copy tool available
-	typeset copy="cp -a"
-	mys_isavail "rsync" && copy="rsync -a"
+	typeset dir="$1"
+	typeset src="$2"
+	typeset name="${src##*/}"
+	typeset dst="$dir/$name"
+
+	[[ -L "$dst" ]] && {
+		echo "MyShell: cannot merge '$src' with '$dst': Target is a symlink"
+		return 1
+	}
 
 	# If target file exists, try to merge files
 	if [[ -e "$dst" ]]; then
-			$copy "$filedst" "$filedst.mys.$(date +'%y%m%d_%H%M%S')"
-			cat "$filesrc" >> "$filedst"
-	# Not existing, just copy it
-	else
-		$copy "$filesrc" "$filedst"
+		# Prepare the merge
+		typeset loc="$MYSHELL_LOC/$name"
+		cp -a "$dst" "$loc"
+
+		# Backup local and clear destination
+		mv "$dst" "${dst}.mys.$(date +'%y%m%d_%H%M%S')"
+
+		# Try to merge if file
+		[[ -f "$loc" ]] && {
+			cat "$src" >> "$loc"
+			src="$loc"
+		}
 	fi
+
+	# Symlink to source
+	ln -s "$src" "$dst"
 }
 
 function mys_isavail {
@@ -37,7 +51,10 @@ function mys_isavail {
 
 # update from origin
 function mys_update {
-	mys_isavail "git" || return 1
+	mys_isavail "git" || {
+		echo "You need git to update MyShell automatically"
+		return 1
+	}
 	
 	if [[ -e "$MYSHELL_DIR/.git" ]]; then
 		git -C "$MYSHELL_DIR" pull
@@ -66,7 +83,6 @@ function mys_loadmod {
 function mys_path_append {
 
 	for newpath in $@; do
-	echo "RAAAH $newpath"
 		OIFS="$IFS"
 		IFS=":"
 		for p in $PATH; do
@@ -77,10 +93,19 @@ function mys_path_append {
 		done
 		IFS="$OIFS"
 		export PATH="$PATH:$newpath"
-		echo "Appended $newpath"
 	done
 }
 
+function mys_setopt {
+	if mys_isavail shopt; then
+		shopt $@ 
+	elif mys_isavail setopt; then
+		setopt $@
+	else
+		echo "MyShell: Fatal error: shopt nor setopt are available. What shell are you using ?"
+		return 1
+	fi
+}
 
 # #####################################
 # Main processing
@@ -88,15 +113,15 @@ function mys_path_append {
 # Load external configuration files
 [[ -e "$MYSHELL_LCK" ]] || {
 	echo "MyShell: Initializing local configuration files"
-	typeset filesrc=""
-	shopt -s dotglob
+	typeset src=""
+	mys_setopt -s dotglob
 	for src in $MYSHELL_EXT/*; do
 		[[ -e "$src" ]] || continue
-
-		typeset dst="$HOME/${filesrc#$MYSHELL_EXT/}"
-		mys_merge "$dst" "$src"
+	
+		echo "MyShell: Merging $src in $HOME"
+		mys_merge "$HOME" "$src"
 	done
-	shopt -u dotglob
+	mys_setopt -u dotglob
 
 	date +'%y%m%d_%H%M%S' >| "$MYSHELL_LCK"
 }
@@ -110,7 +135,7 @@ typeset mys_custom="$MYSHELL_DIR/myshell.${0##*/}"
 if [[ -e "$mys_custom" ]]; then
 	. "$mys_custom"
 else
-	echo "No custom file found for shell $0"
+	echo "MyShell: No custom file found for shell $0"
 fi
 
 # Load custom modules
