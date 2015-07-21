@@ -1,6 +1,10 @@
-# use strict
 # vim: ft=sh
-set -u
+
+# Shell is non-interactive. Be done now
+[[ $- != *i* ]] && return
+
+# use strict (cannot work with third party modules badly written...)
+#set -u
 
 # Configuration
 typeset MYSHELL_HUB="https://github.com/saruspete/myshell.git"
