@@ -9,14 +9,19 @@
 # Configuration
 typeset MYSHELL_HUB="https://github.com/saruspete/myshell.git"
 typeset MYSHELL_DIR="$HOME/.myshell"
-typeset MYSHELL_LIB="$MYSHELL_DIR/lib"
-typeset MYSHELL_BIN="$MYSHELL_DIR/bin"
-typeset MYSHELL_EXT="$MYSHELL_DIR/home"
-typeset MYSHELL_LOC="$MYSHELL_DIR/local"
+typeset MYSHELL_LIB="$MYSHELL_DIR/lib"   # Shell env to be loaded
+typeset MYSHELL_BIN="$MYSHELL_DIR/bin"   # Local bin
+typeset MYSHELL_EXT="$MYSHELL_DIR/home"  # Home data to be merged
+typeset MYSHELL_LOC="$MYSHELL_DIR/local" # Local modifications
+typeset MYSHELL_RUN="$MYSHELL_DIR/run"   # Cache
 typeset MYSHELL_LCK="$MYSHELL_DIR/.initialized"
 
 # #####################################
 # Helper subs
+
+function mys_date {
+	date +'%Y-%m-%d_%H-%M-%S'
+}
 
 function mys_merge {
 	typeset dir="$1"
@@ -46,7 +51,7 @@ function mys_merge {
 	fi
 
 	# Symlink to source
-	ln -s "$src" "$dst"
+	ln -s "${src#$dir}" "$dst"
 }
 
 function mys_isavail {
@@ -59,7 +64,7 @@ function mys_update {
 		echo "You need git to update MyShell automatically"
 		return 1
 	}
-	
+
 	if [[ -e "$MYSHELL_DIR/.git" ]]; then
 		git -C "$MYSHELL_DIR" pull
 	else
@@ -72,8 +77,11 @@ function mys_sync {
 	typeset hosts="$@"
 }
 
+function mys_relaod {
+	source "$MYSHELL_DIR/myshell"
+}
 
-# Load 
+# Load
 function mys_loadmod {
 	typeset mod="$1"
 	typeset val="$2"
@@ -84,7 +92,92 @@ function mys_loadmod {
 	done
 }
 
-function mys_path_append {
+# 
+function mys_cacherun {
+	typeset name="$1"; shift
+
+	[[ -n "$name" ]] && [[ -n "$@" ]] || {
+		echo "MyShell: Usage: mys_cacherun <name> <command>" >&2
+		return 1
+	}
+
+	typeset date="$(mys_date)"
+	typeset cachepath="$MYSHELL_RUN/cache/${name}/"
+	[[ -d "$cachepath" ]] || mkdir -p "$cachepath"
+	typeset cachefile="$cachepath/$date"
+
+	# Get start time, execute the command, write metadata, write output
+	typeset start="$(mys_date)"
+	typeset result=""; result="$($@)"
+	typeset rescode="$?"
+	echo -n "'$@' # \$?=$rescode # $start # $(mys_date)" >| "$cachefile.meta"
+	echo "$result" | tee "$cachefile.out"
+	# Set it as the last file
+	ln -sf "${cachefile}.out"  "${cachepath}/last.out"
+	ln -sf "${cachefile}.meta" "${cachepath}/last.meta"
+	# And return command result
+	return $rescode
+}
+
+function mys_cachelist {
+	typeset name="$1"
+
+	[[ -z "$name" ]] && {
+		echo "MyShell: Usage: mys_cachelist <name>" >&2
+		return 1
+	}
+
+	typeset cachepath="$MYSHELL_RUN/cache/$name/"
+	for out in $cachepath/*.out; do
+		[[ ! -e "$out" ]] && continue
+		echo "${out##*/}  ( $(< ${out%.out}.meta) )"
+	done
+}
+
+function mys_cacheget {
+	typeset name="$1"
+	typeset vers="${2:-last}"
+
+	[[ -z "$name" ]] && {
+		echo "MyShell: Usage: mys_cacheget <name> [version]" >&2
+		return 1
+	}
+
+	typeset cachepath="$MYSHELL_RUN/cache/$name"
+	[[ ! -e "${cachepath}/${vers}.out" ]] && {
+		echo "MyShell: No version of '$name' matches '$vers'" >&2
+		return 2
+	}
+	# Output the file
+	cat "$cachepath/${vers}.out"
+}
+
+function mys_cacheclear {
+	:
+}
+
+# #####################################
+# Environement management
+
+function mys_path_binadd {
+	mys_path_add "PATH" $@
+}
+
+function mys_path_manadd {
+	mys_path_add "MANPATH" $@
+}
+
+function mys_path_libadd {
+	mys_path_add "LB_LIBRARY_PATH" $@
+}
+
+
+function mys_path_add {
+	typeset var="$1"; shift
+	typeset where="$1"
+	if [[ "$where" == "before" ]] || [[ "$where" == "after" ]]; then
+		shift
+	fi
 
 	for newpath in $@; do
 		OIFS="$IFS"
@@ -96,8 +189,14 @@ function mys_path_append {
 			}
 		done
 		IFS="$OIFS"
-		export PATH="$PATH:$newpath"
+		# Where to add the path
+		if [[ "$where" == "before" ]]; then
+			eval export $var="$newpath:\$$var"
+		else
+			eval export $var="\$$var:$newpath"
+		fi
 	done
+
 }
 
 function mys_setopt {
@@ -131,7 +230,7 @@ function mys_setopt {
 }
 
 # Add custom binaries to PATH
-mys_path_append "$MYSHELL_BIN"
+mys_path_binadd "$MYSHELL_BIN"
 
 
 # Load per-shell definitions
@@ -145,6 +244,10 @@ fi
 # Load custom modules
 mys_loadmod "default" "*"
 mys_loadmod "os" "$(uname -s)"
+mys_loadmod "os" "$(uname -s).priv"
 mys_loadmod "shell" "${0##*/}"
+mys_loadmod "shell" "${0##*/}.priv"
 mys_loadmod "host" "$(uname -n)"
+mys_loadmod "host" "$(uname -n).priv"
 mys_loadmod "user" "$(id -nu)"
+mys_loadmod "user" "$(id -nu).priv"
