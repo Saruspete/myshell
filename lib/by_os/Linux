@@ -1,0 +1,28 @@
+
+
+alias psg="ps auxf | grep"
+
+
+# Courtesy of B. Binier
+function showmodopt {
+	[[ ! -e "/proc/modules" ]] && {
+		echo "Module support is disabled on this machine"
+		return 0
+	}
+
+	awk '{print $1}' /proc/modules | while read mod; do
+		echo "Module: $mod"
+		[[ -d "/sys/module/$mod/parameters" ]] && {
+			for param in /sys/module/$mod/parameters/*; do
+				# Direct read
+				echo -en "\tParameter: $param --> "
+				if [[ -r "$param" ]]; then
+					echo $(<$param)
+				# No read right, try sudo
+				else 
+					mys_isavail sudo && sudo cat $param 2>/dev/null
+				fi
+			done
+		}
+	done
+}

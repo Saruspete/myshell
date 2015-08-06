@@ -1,0 +1,4 @@
+# default gnu & sunfreeware
+mys_path_binadd "/usr/sfw/bin" "/usr/openwin/bin"
+
+alias psg="ps -cafe | grep"
