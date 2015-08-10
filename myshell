@@ -75,9 +75,14 @@ function mys_update {
 # sync and send to another local hosts
 function mys_sync {
 	typeset hosts="$@"
+	for h in $hosts; do
+		echo "MyShell: Syncing $h"
+		ssh $h '[ -e $HOME/.myshell ] || mkdir "$HOME/.myshell"; for i in $HOME/{.bashrc,.profile}; do [ -e "$i" ] || ln -s .myshell/myshell $i; done' 2>/dev/null
+		rsync -a "$MYSHELL_DIR/" $h:
+	done
 }
 
-function mys_relaod {
+function mys_reload {
 	source "$MYSHELL_DIR/myshell"
 }
 
