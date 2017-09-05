@@ -237,6 +237,14 @@ function mys_setopt {
 # Add custom binaries to PATH
 mys_path_binadd "$MYSHELL_BIN"
 
+# Try to guess our running env (chroot, jail, VM...)
+typeset MYS_RUNENV=""
+[[ -e /proc/1/mountinfo ]] && {
+	[[ "$(awk '$5=="/"{print $4}' /proc/1/mountinfo)" != "/" ]] && {
+		MYS_RUNENV="chroot"
+	}
+}
+
 
 # Load per-shell definitions
 typeset mys_shellname="${0##*/}"
@@ -252,8 +260,8 @@ fi
 mys_loadmod "default" "*"
 mys_loadmod "os" "$(uname -s)"
 mys_loadmod "os" "$(uname -s).priv"
-mys_loadmod "shell" "${0##*/}"
-mys_loadmod "shell" "${0##*/}.priv"
+mys_loadmod "shell" "$mys_shellname"
+mys_loadmod "shell" "$mys_shellname.priv"
 mys_loadmod "host" "$(uname -n)"
 mys_loadmod "host" "$(uname -n).priv"
 mys_loadmod "user" "$(id -nu)"
