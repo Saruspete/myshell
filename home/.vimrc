@@ -52,14 +52,19 @@ NeoBundleCheck
 
 
 " Syntax and load
-syn on
+syntax on
 set ai
 set modeline
+colorscheme molokai
 
-" Tab spaces
-set ts=4
-set sts=4
-set sw=4
+" indent
+set tabstop=4
+set softtabstop=4
+set shiftwidth=4
+set smartindent
+set autoindent
+set list!
+set lcs=tab:>.,trail:.,extends:~
 
 " Remap the leader key
 let mapleader = "\<Space>"
@@ -73,4 +78,28 @@ omap s :normal vs<CR>
 " For the 'crap I forgot to run vim as sudo'
 cmap w!! w !sudo tee % >/dev/null
 
+
+" 80 & 120 column display
+"let &colorcolumn=join(range(81,999),",")
+let &colorcolumn="80,".join(range(120,999),",")
+"highlight ColorColumn ctermbg=235 guibg=#2c2d27
+
+
+" Infos options
+set showmatch
+set showcmd
+
+" Auto-paste
+let &t_SI .= "\<Esc>[?2004h"
+let &t_EI .= "\<Esc>[?2004l"
+inoremap <special> <expr> <Esc>[200~ XTermPasteBegin()
+
+function! XTermPasteBegin()
+	set pastetoggle=<Esc>[201~
+	set paste
+	return ""
+endfunction
+
+" Toggle shortcut
+nnoremap <space> za
 
