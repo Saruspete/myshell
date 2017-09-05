@@ -25,3 +25,15 @@ alias ydiff="diff -y --suppress-common-lines"
 #unset PROMPT_COMMAND
 #export PS1='\[\033[01;31m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] [$?] \$ '  # Bash
 #export PS1='[01;31m\]\u@\h[00m\]:[01;34m\]\w[00m\] [$?] \$ ' # KSH
+
+function viw {
+	for b in "$@"; do
+		typeset p="$(\type -P $b)"
+		if [[ -n "$p" ]]; then
+			echo "$b => $p"
+			${EDITOR:-vim} $p
+		else
+			echo "Unable to locate '$b'"
+		fi
+	done
+}

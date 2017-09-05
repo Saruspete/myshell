@@ -1,0 +1,24 @@
+# vim: ft=sh
+
+function msr {
+	(echo -n 'ibase=16;obase=2;'; sudo rdmsr -X "$@") | bc | sed -r 's/(.{8})/\1 /g'
+}
+
+
+function httpheaders {
+	typeset srv="$1"
+	typeset prt="${2:-80}"
+	exec 5<> /dev/tcp/$server/$port
+	echo -e "HEAD / HTTP/1.0\nHost: ${server}\n\n" >&5
+	cat 0<&5
+	exec 5>&-
+}
+
+function testport {
+	typeset srv="$1"
+	typeset prt="$2"
+	typeset proto="${3-:tcp}"
+	exec 5<>/dev/$proto/$server/$port
+	[[ $? -eq 0 ]] && exec 5<&-
+}
+
