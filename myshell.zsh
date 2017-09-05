@@ -49,7 +49,8 @@ ZSH_THEME="iamroot"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git git-extras common-alises encode64 perl)
+plugins=(git git-extras common-alises encode64 perl zsh-completions)
+autoload -U compinit && compinit
 
 # Binaries
 for mod in docker screen terminator nmap sudo systemd; do
@@ -93,3 +94,5 @@ mys_isavail "hg" && plugins+="mercurial"
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+
+unsetopt nomatch
