@@ -16,9 +16,13 @@ mys_isavail "vim" && export EDITOR="vim"
 
 # Aliases cause I'm lazy
 alias l="ls -al"
+alias s="screen -r"
 alias gh="getent hosts"
 alias gp="getent passwd"
 alias gg="getent group"
+
+# That one to make my own aliases work
+alias sudo="sudo "
 
 alias ydiff="diff -y --suppress-common-lines"
 
