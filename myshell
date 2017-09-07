@@ -51,7 +51,7 @@ function mys_merge {
 	fi
 
 	# Symlink to source
-	ln -s "${src#$dir}" "$dst"
+	ln -s "${src#$dir/}" "$dst"
 }
 
 function mys_isavail {
