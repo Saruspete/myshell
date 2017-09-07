@@ -26,3 +26,13 @@ function showmodopt {
 		}
 	done
 }
+
+function procenv {
+	for pid in "$@"; do
+		typeset pd="/proc/$pid"
+		[[ -e "$pd/environ" ]] || continue;
+
+		echo "==== $pid / $(<$pd/comm) $(readlink -f $pd/exe 2>/dev/null)" >&2
+		cat $pd/environ | tr '\0' '\n' | sort
+	done
+}
