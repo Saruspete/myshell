@@ -1,0 +1,19 @@
+# vim: ft=sh
+
+typeset SSH_ENV="$HOME/.ssh/environment"
+function ssh-agent-start {
+	echo "Initializing new SSH agent..."
+	ssh-agent | sed 's/^echo/#echo/' > $SSH_ENV
+	echo "Succeeded"
+	chmod 600 "$SSH_ENV"
+	source "$SSH_ENV" > /dev/null
+	ssh-add
+}
+
+# Auto start the agent
+if [[ -f "$SSH_ENV" ]]; then
+	source "$SSH_ENV" > /dev/null
+	grep ssh-agent /proc/*/comm >/dev/null 2>&1 || ssh-agent-start
+else
+	ssh-agent-start
+fi
