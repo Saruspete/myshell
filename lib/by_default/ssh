@@ -2,18 +2,56 @@
 
 typeset SSH_ENV="$HOME/.ssh/environment"
 function ssh-agent-start {
+	typeset lockfile="$SSH_ENV.lock"
+	typeset locktime=5
+
+	# Do a basic lock
+	[[ -s "$lockfile" ]] && {
+		echo "Lockfile $lockfile exists. Waiting $locktime secs for release"
+		for i in {1..$locktime}; do
+			[[ -e "$lockfile" ]] || break
+			sleep 1
+		done
+
+		# If we see a file, try to use it
+		[[ -s $SSH_ENV ]] && {
+			source "$SSH_ENV" > /dev/null
+			[[ -e "/proc/$SSH_AGENT_PID/exe" ]] && return
+		}
+	}
+
+	# Double check for race condition
+	set -o noclobber
+	echo $$ > "$SSH_ENV.lock" || {
+		echo "Race detected. Restarting sequence"
+		ssh-agent-start
+		return
+	}
+	set +o noclobber
+
 	echo "Initializing new SSH agent..."
 	ssh-agent | sed 's/^echo/#echo/' > $SSH_ENV
 	echo "Succeeded"
 	chmod 600 "$SSH_ENV"
 	source "$SSH_ENV" > /dev/null
 	ssh-add
+
+	rm "$lockfile"
 }
+
 
 # Auto start the agent
 if [[ -f "$SSH_ENV" ]]; then
 	source "$SSH_ENV" > /dev/null
-	grep ssh-agent /proc/*/comm >/dev/null 2>&1 || ssh-agent-start
+
+	typeset found=""
+	for proc in $(\grep -l ssh-agent /proc/*/comm 2>&1); do
+		[[ "$(< ${proc%comm}loginuid )" == "$(id -u)" ]] && found="$proc"
+	done
+
+	# No matching process found, start our own
+	[[ -z "$found" ]] && ssh-agent-start
 else
 	ssh-agent-start
 fi
+
