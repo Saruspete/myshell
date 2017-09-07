@@ -45,8 +45,8 @@ if [[ -f "$SSH_ENV" ]]; then
 	source "$SSH_ENV" > /dev/null
 
 	typeset found=""
-	for proc in $(\grep -l ssh-agent /proc/*/comm 2>&1); do
-		[[ "$(< ${proc%comm}loginuid )" == "$(id -u)" ]] && found="$proc"
+	for proc in $(\grep -l ssh-agent$ /proc/*/comm 2>&1); do
+		[[ "$(<${proc%comm}loginuid)" == "$(id -u)" ]] && found="$proc"
 	done
 
 	# No matching process found, start our own
