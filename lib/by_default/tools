@@ -1,9 +1,37 @@
 # vim: ft=sh
 
-function msr {
-	(echo -n 'ibase=16;obase=2;'; sudo rdmsr -X "$@") | bc | sed -r 's/(.{8})/\1 /g'
+###########################################################
+#
+# Parsing tools
+#
+
+function charrepeat {
+	typeset time="${1:-1}"
+	typeset char="${2:- }"
+	seq -s "$char" $time|tr -d '[:digit:]'
 }
 
+
+###########################################################
+#
+# System tools
+#
+
+function runasroot {
+	typeset pref=""
+	[[ "$(id -u)" != "0" ]] && pref=sudo
+	$pref "$@"
+}
+
+# Read CPU MSR
+function msr {
+	(echo -n 'ibase=16;obase=2;'; runasroot rdmsr -X "$@") | bc | sed -r 's/(.{8})/\1 /g'
+}
+
+###########################################################
+#
+# Network tools
+#
 
 function httpheaders {
 	typeset srv="$1"
@@ -22,3 +50,36 @@ function testport {
 	[[ $? -eq 0 ]] && exec 5<&-
 }
 
+###########################################################
+#
+# Binary tools
+#
+
+function _ldd {
+	ldd $1 | awk 'NF>3 && $1 != "libc.so.6"{print $3}'
+}
+
+function lddr {
+	[[ $# -eq 0 ]] && return
+
+	typeset -i level="0"
+	[[ ! -e "$1" ]] && [[ -z "$(\type -P $1)" ]] && {
+		level="$1"
+		shift
+	}
+	typeset pad="$(charrepeat $(($level * 4)) )"
+	level="$(($level + 1))"
+
+	for file in "$@"; do
+		typeset realbin="$(type -P $file)"
+		# First level is invocking one
+		[[ "$level" == "1" ]] && {
+			printf "== %s (%s)\n" "$file" "$realbin"
+		}
+
+		for lib in $(_ldd $realbin); do
+			printf "%s  %s\n" "$pad" "$lib"
+			lddr "$level" "$lib"
+		done
+	done
+}
