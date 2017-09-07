@@ -28,6 +28,10 @@ function msr {
 	(echo -n 'ibase=16;obase=2;'; runasroot rdmsr -X "$@") | bc | sed -r 's/(.{8})/\1 /g'
 }
 
+function lsofdelete {
+	runasroot lsof 2>/dev/null| awk '/deleted/{print $(NF-3),$0}' | sort -n
+}
+
 ###########################################################
 #
 # Network tools
