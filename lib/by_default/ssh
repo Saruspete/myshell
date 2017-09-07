@@ -8,27 +8,35 @@ function ssh-agent-start {
 	# Do a basic lock
 	[[ -s "$lockfile" ]] && {
 		echo "Lockfile $lockfile exists. Waiting $locktime secs for release"
-		for i in {1..$locktime}; do
+		for i in $(seq $locktime); do
 			[[ -e "$lockfile" ]] || break
 			sleep 1
 		done
-
-		# If we see a file, try to use it
-		[[ -s $SSH_ENV ]] && {
-			source "$SSH_ENV" > /dev/null
-			[[ -e "/proc/$SSH_AGENT_PID/exe" ]] && return
-		}
 	}
 
 	# Double check for race condition
 	set -o noclobber
-	echo $$ > "$SSH_ENV.lock" || {
-		echo "Race detected. Restarting sequence"
-		ssh-agent-start
-		return
+	echo $$ > "$lockfile" || {
+		sleep "$(($RANDOM%2)).$(($RANDOM%100))"
+		typeset lockpid="$(cat $lockfile 2>/dev/null)"
+		if [[ -e "/proc/$lockpid/" ]]; then
+			echo "Race detected. Restarting sequence"
+			ssh-agent-start
+			return
+		else
+			echo "Stale ($lockpid) detected. Removing lockfile"
+			rm $lockfile
+		fi
 	}
 	set +o noclobber
 
+	# If we see a file, try to use it
+	[[ -s $SSH_ENV ]] && {
+		source "$SSH_ENV" > /dev/null
+		[[ -e "/proc/$SSH_AGENT_PID/exe" ]] && return
+	}
+
+	# Start the agent
 	echo "Initializing new SSH agent..."
 	ssh-agent | sed 's/^echo/#echo/' > $SSH_ENV
 	echo "Succeeded"
