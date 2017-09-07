@@ -1,3 +1,5 @@
+# vim: ft=sh
+
 # Some default path
 mys_path_binadd "/usr/local/bin" "/usr/local/sbin"
 mys_path_manadd "/usr/local/share/man" 
@@ -36,4 +38,13 @@ function viw {
 			echo "Unable to locate '$b'"
 		fi
 	done
+}
+
+function newop {
+	# I want "$*" and not "$@"
+	typeset -u name="$*"
+	[[ -z "$name" ]] && { echo "Usage: newop name of the op"; return 1; }
+	typeset fold="$HOME/OPERATIONS/$(date +'%y-%m-%d')_${name// /_}"
+	mkdir -p "$fold"
+	cd "$fold"
 }
