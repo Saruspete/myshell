@@ -44,14 +44,12 @@ function ssh-agent-start {
 if [[ -f "$SSH_ENV" ]]; then
 	source "$SSH_ENV" > /dev/null
 
-	typeset found=""
-	for proc in $(\grep -l ssh-agent$ /proc/*/comm 2>&1); do
-		[[ "$(<${proc%comm}loginuid)" == "$(id -u)" ]] && found="$proc"
-	done
-
-	# No matching process found, start our own
-	[[ -z "$found" ]] && ssh-agent-start
+	# If the file exists, check its still valid
+	[[ -e /proc/$SSH_AGENT_PID ]] && \
+	[[ "$(cat /proc/$SSH_AGENT_PID/loginuid)" == "$(id -u)" ]] || {
+		echo "Stale ssh environment file. Restarting"
+		ssh-agent-start
+	}
 else
 	ssh-agent-start
 fi
-
