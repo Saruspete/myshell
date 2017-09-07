@@ -91,6 +91,7 @@ function mys_loadmod {
 	typeset mod="$1"
 	typeset val="$2"
 
+	[[ -z "$val" ]] && return
 	for file in $MYSHELL_LIB/by_$mod/$val; do
 		[[ -e "$file" ]] || continue
 		. "$file"
@@ -256,13 +257,24 @@ else
 	echo "MyShell: No custom file found for shell $0"
 fi
 
+# Domains
+typeset mys_hostname="$(uname -n)"
+typeset mys_hostfqdn="$(getent hosts $mys_hostname|awk 'END{print $2}')"
+typeset mys_hostdom="${mys_hostfqdn#*.}"
+[[ "$mys_hostdom" == "$mys_hostfqdn" ]] && {
+	mys_hostdom=""
+}
+
 # Load custom modules
 mys_loadmod "default" "*"
 mys_loadmod "os" "$(uname -s)"
 mys_loadmod "os" "$(uname -s).priv"
 mys_loadmod "shell" "$mys_shellname"
 mys_loadmod "shell" "$mys_shellname.priv"
-mys_loadmod "host" "$(uname -n)"
-mys_loadmod "host" "$(uname -n).priv"
+mys_loadmod "domain" "$mys_hostdom"
+mys_loadmod "domain" "$mys_hostdom.priv"
+mys_loadmod "host" "$mys_hostname"
+mys_loadmod "host" "$mys_hostname.priv"
 mys_loadmod "user" "$(id -nu)"
 mys_loadmod "user" "$(id -nu).priv"
+
