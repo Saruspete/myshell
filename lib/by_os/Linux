@@ -36,3 +36,11 @@ function procenv {
 		cat $pd/environ | tr '\0' '\n' | sort
 	done
 }
+
+
+# ShitstemD management
+[[ "$(</proc/1/comm)" == "systemd" ]] && {
+
+	# Disable fucking pager. If I want one, I'll call one.
+	export SYSTEMD_PAGER=""
+}
