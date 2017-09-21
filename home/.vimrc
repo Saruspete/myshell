@@ -1,12 +1,14 @@
+" -----------------------------------------------------------------------------
 " Vim profile
 " Adrien Mahieux <adrien@mahieux.net>
 " 
 " Links
 " - http://sheerun.net/2014/03/21/how-to-boost-your-vim-productivity/
 " - http://vim.wikia.com/wiki/Copy_or_change_search_hit
-
+"
 
 "NeoBundle Scripts-----------------------------
+if (0 == 1)
 if has('vim_starting')
   if &compatible
     set nocompatible               " Be iMproved
@@ -45,9 +47,8 @@ filetype plugin indent on
 " If there are uninstalled bundles found on startup,
 " this will conveniently prompt you to install them.
 NeoBundleCheck
+endif
 "End NeoBundle Scripts-------------------------
-
-
 
 
 
@@ -65,6 +66,9 @@ set smartindent
 set autoindent
 set list!
 set lcs=tab:>.,trail:.,extends:~
+
+" Fix a 100% CPU hang with yaml files
+set re=1
 
 " Remap the leader key
 let mapleader = "\<Space>"
@@ -103,3 +107,7 @@ endfunction
 " Toggle shortcut
 nnoremap <space> za
 
+" Skeletton
+au BufNewFile *.sh 0r ~/.vim/templates/bash.skel
+
+" -----------------------------------------------------------------------------

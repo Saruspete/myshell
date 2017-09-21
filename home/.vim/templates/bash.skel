@@ -1,0 +1,6 @@
+#!/bin/bash
+
+typeset MYSELF="$(readlink -f $0)"
+typeset MYPATH="${MYSELF%/*}"
+
+
