@@ -1,4 +1,4 @@
-
+# vim: ft=sh
 
 alias psg="ps auxf | grep"
 
@@ -25,6 +25,59 @@ function showmodopt {
 			done
 		}
 	done
+}
+
+# List modules
+function lsmodr {
+	_lsmodr 1 "$@"
+}
+
+function _lsmodr {
+
+	typeset lvl="$1"; shift
+
+	# Try to list each arg and its deps
+	for mod in "$@"; do
+		typeset deps="$(awk '$1=="'$mod'"{print $4}' /proc/modules|tr ',' ' ')"
+
+		charrepeat $lvl "-" | tr -d '\n'
+		awk '$1=="'$mod'"{print $1,$2,$3,$4}' /proc/modules
+
+		[[ "$deps" != "-" ]] && {
+			_lsmodr $(($lvl +1)) $deps
+		}
+	done | column -t
+}
+
+function rmmodr {
+
+	# Try to unload each argument
+	for mod in "$@"; do
+		typeset    deps="$(awk '$1=="'$mod'"{print $4}' /proc/modules|tr ',' ' ')"
+		typeset -i nref="$(awk '$1=="'$mod'"{print $3}' /proc/modules)"
+		typeset -i ndep="$(echo $deps|wc -w)"
+		[[ "$ndep" -lt "$nref" ]] && {
+			echo "Wont be able to unload $mod: got $nref refs and $ndep deps"
+			return 1
+		}
+		# Recurse if dependencies
+		[[ $nref -gt 0 ]] && {
+			rmmodr $deps || {
+				echo "Failed dependency removal for '$mod'"
+				return 1
+			}
+		}
+
+		# check if not already unloaded by another dep
+		[[ -n "$(awk '$1 =="'$mod'"' /proc/modules)" ]] && {
+			# Do the unload
+			runasroot rmmod $mod || {
+				echo "Unable to remove '$mod': return $?"
+				return 1
+			}
+		}
+	done
+
 }
 
 function procenv {
