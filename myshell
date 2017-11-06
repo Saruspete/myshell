@@ -238,11 +238,24 @@ function mys_setopt {
 # Add custom binaries to PATH
 mys_path_binadd "$MYSHELL_BIN"
 
+# Domains
+typeset mys_hostname="$(uname -n)"
+typeset mys_hostfqdn="$(getent hosts $mys_hostname|awk 'END{print $2}')"
+typeset mys_hostdom="${mys_hostfqdn#*.}"
+[[ "$mys_hostdom" == "$mys_hostfqdn" ]] && {
+	mys_hostdom=""
+}
+
+
 # Try to guess our running env (chroot, jail, VM...)
 typeset MYS_RUNENV=""
 [[ -e /proc/1/mountinfo ]] && {
 	[[ "$(awk '$5=="/"{print $4}' /proc/1/mountinfo)" != "/" ]] && {
-		MYS_RUNENV="chroot"
+		if [[ -d "/sys/fs/cgroup/memory/lxc/$mys_hostname*" ]]; then
+			MYS_RUNENV="lxc"
+		else
+			MYS_RUNENV="chroot"
+		fi
 	}
 }
 
@@ -254,16 +267,8 @@ typeset mys_custom="$MYSHELL_DIR/myshell.${mys_shellname}"
 if [[ -e "$mys_custom" ]]; then
 	source "$mys_custom"
 else
-	echo "MyShell: No custom file found for shell $0"
+	echo "MyShell: No custom file found for shell '$0'"
 fi
-
-# Domains
-typeset mys_hostname="$(uname -n)"
-typeset mys_hostfqdn="$(getent hosts $mys_hostname|awk 'END{print $2}')"
-typeset mys_hostdom="${mys_hostfqdn#*.}"
-[[ "$mys_hostdom" == "$mys_hostfqdn" ]] && {
-	mys_hostdom=""
-}
 
 # Load custom modules
 mys_loadmod "default" "*"
