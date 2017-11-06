@@ -216,6 +216,19 @@ function mys_setopt {
 	fi
 }
 
+
+typeset -i MYS_LOADTIME="$(date +%s)"
+function mys_promptfunc {
+	# Reload configuration if witness flag is present
+	[[ -e "$MYSHELL_DIR/.reload" ]] &&
+	[[ "$(<$MYSHELL_DIR/.reload)" -gt "$MYS_LOADTIME" ]] && {
+		mys_reload
+	}
+
+	# Do extended tests if needed.
+}
+PROMPT_COMMAND="mys_promptfunc"
+
 # #####################################
 # Main processing
 
