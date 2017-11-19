@@ -1,0 +1,178 @@
+shell /bin/bash
+# config de screen par bennyben
+# raccourcis avec Ctrl-x puis une touche
+# ou alors Ctrl-meta-une touche, voire Shirt-Ctrl-Meta
+
+# ------------------------------------------------------------------------------
+# GLOBAL SETTINGS
+# ------------------------------------------------------------------------------
+
+startup_message off
+
+#defflow on # will force screen to process ^S/^Q
+deflogin on
+autodetach on
+
+# turn visual bell on
+vbell on
+vbell_msg "   Wuff  ----  Wuff!!  "
+
+# define a bigger scrollback, default is 100 lines
+defscrollback 10240
+
+# ------------------------------------------------------------------------------
+# KEYBINDINGS
+# ------------------------------------------------------------------------------
+
+# Remove some stupid / dangerous key bindings
+#bind '^k'
+#bind 'L'
+#bind '^\'
+# Make them better
+#bind '\\' quit
+#bind 'K' kill
+#bind 'I' login on
+#bind 'O' login off
+#bind '}' history
+
+#bind 'R' colon "screen -ln rlogin faui -8^b^b^b"
+#bind 'P' colon "^p"
+
+# escape ""
+#escape "^xx"
+#bindkey \033^b break
+#
+#
+	# ctrl-meta-insert
+#
+#bindkey \033^V digraph
+#bindkey \033^. dumptermcap
+#bindkey \033^F fit
+#bindkey \033^f flow
+#bindkey \033^I focus
+#bindkey \033^h hardcopy
+
+#bindkey \033^{ history
+#bindkey \033^i info
+#bindkey \033^m lastmsg
+#bindkey \033^, license
+#bindkey \033^H log
+#bindkey \033^L login
+#bindkey \033^M monitor
+#bindkey \033^n next
+
+#bindkey \033^N number
+#bindkey \033^Q only
+#bindkey \033^X other
+#bindkey \033^B pow_break
+#bindkey \033^D pow_detach
+#bindkey \033^\ quit
+#bindkey \033^< readbuf
+#bindkey \033^l redisplay
+#bindkey \033^X remove
+#bindkey \033^= removebuf
+#bindkey \033^Z reset
+#bindkey \033^' select
+#bindkey \033^_ silence
+#bindkey \033^S split
+#bindkey \033^z suspend
+#bindkey \033^t time
+#bindkey \033^A title
+#bindkey \033^G vbell
+#bindkey \033^v version
+#bindkey \033^W width
+#bindkey \033^r wrap
+#bindkey \033^> writebuf
+#bindkey \033^s xoff
+#bindkey \033^q xon
+
+#bindkey \033^x next
+#bindkey \033^w prev
+#bindkey \033^n next
+#bindkey \033^p prev
+#bindkey \033^c screen
+#bindkey \033^d detach
+#bindkey \033: colon
+#bindkey \033? help
+#bindkey \033^l clear
+#bindkey \033² displays
+#bindkey \033^P hardcopy
+#bindkey \033^k kill
+#bindkey \033^L log
+#bindkey \033^m monitor
+#bindkey \033ù silence
+#bindkey \033^t title
+#bindkey \033^S split
+#bindkey \033^f fit
+#bindkey \033^q xon
+#bindkey \033^s xoff
+#bindkey \033\033[2\^ copy
+#bindkey \033^k digraph
+#bindkey \033^a focus up
+#bindkey \033^z focus down
+#bindkey \033* lockscreen
+
+# An example of a "screen scraper" which will launch urlview on the current
+# screen window
+#
+#bind ^B eval "hardcopy_append off" "hardcopy -h $HOME/.screen-urlview" "screen urlview $HOME/.screen-urlview"
+
+# on Debian backspace should send char `\177':
+bindkey -k kb stuff "\177"
+
+# ------------------------------------------------------------------------------
+# TERMINAL SETTINGS
+# ------------------------------------------------------------------------------
+
+# The vt100 description does not mention "dl". *sigh*
+termcapinfo vt100 dl=5\E[M
+
+# turn sending of screen messages to hardstatus off
+#hardstatus off
+hardstatus on
+# Set the hardstatus prop on gui terms to set the titlebar/icon title
+termcapinfo xterm*|rxvt*|kterm*|Eterm* hs:ts=\E]0;:fs=\007:ds=\E]0;\007
+# use this for the hard status string
+#hardstatus string "%h%? users: %u%?"
+
+# An alternative hardstatus to display a bar at the bottom listing the
+# windownames and highlighting the current windowname in blue. (This is only
+# enabled if there is no hardstatus setting for your terminal)
+#
+#hardstatus alwayslastline "%-Lw%{= BW}%50>%n%f* %t%{-}%+Lw%<"
+#  version d'avant, allégée avec seulement les window en cours et celle courante en jaune
+#  et fond bleu
+#hardstatus alwayslastline "%{= BY}%-Lw%{= YB}%50>%n%f* %t%{= BY}%+Lw%<"
+#
+hardstatus alwayslastline "%{b kB}%{s gB}%c%{b kB} %{b kR}%H %{b kB}%{s yB}%l%{b kB} %{b kB}%{rs Y}%-Lw%{BY}%50>%n%{R}%f%{B} %t%{YB}%+Lw%<"
+
+# set these terminals up to be 'optimal' instead of vt100
+termcapinfo xterm*|linux*|rxvt*|Eterm* OP
+
+# Change the xterm initialization string from is2=\E[!p\E[?3;4l\E[4l\E>
+# (This fixes the "Aborted because of window size change" konsole symptoms found
+#  in bug #134198)
+termcapinfo xterm 'is=\E[r\E[m\E[2J\E[H\E[?7h\E[?1;4;6l'
+
+termcapinfo xterm*|linux*|rxvt*|Eterm* ti@:te@
+
+# Do not use xterms alternate window buffer (won't add lines to scrollback bfr)
+#termcapinfo xterm|xterms|xs ti=\E7\E[?47l
+
+# ------------------------------------------------------------------------------
+# STARTUP SCREENS
+# ------------------------------------------------------------------------------
+
+# Example of automatically running some programs in windows on screen startup.
+#
+#   The following will open top in the first window, an ssh session to monkey
+#   in the next window, and then open mutt and tail in windows 8 and 9
+#   respectively.
+#
+# screen top
+# screen -t monkey ssh monkey
+# screen -t mail 8 mutt
+# screen -t daemon 9 tail -f /var/log/daemon.log
+
+sorendition =s WB 
+msgwait 3
