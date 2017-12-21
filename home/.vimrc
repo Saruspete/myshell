@@ -362,10 +362,10 @@ call CreateShortcut("C-s", ":call MySave()<CR>", "nv", "cmdInVisual", "restoreSe
 call CreateShortcut("C-s", ":call MySave()<CR>i<Right>", "i", "noTrailingIInInsert")
 
 " Home - Go To Begin
-call CreateShortcut("Home", "gg", "inv")
+"call CreateShortcut("Home", "gg", "inv")
 
 " End - Go To End
-call CreateShortcut("End", "G", "inv")
+"call CreateShortcut("End", "G", "inv")
 
 " Ctrl K - Delete Line
 call CreateShortcut("C-k", "dd", "in")
