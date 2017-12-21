@@ -352,10 +352,10 @@ nnoremap <Backspace> i<Backspace>
 nnoremap <Space> i<Space>
 
 " Ctrl A - Begin Line
-call CreateShortcut("C-a", "0", "inv")
+"call CreateShortcut("C-a", "0", "inv")
 
 " Ctrl E - End Line
-call CreateShortcut("C-e", "$l", "inv")
+"call CreateShortcut("C-e", "$l", "inv")
 
 " Ctrl S - Save
 call CreateShortcut("C-s", ":call MySave()<CR>", "nv", "cmdInVisual", "restoreSelectionAfter")
@@ -401,10 +401,10 @@ call CreateShortcut("C-g", ":s/", "in", "noTrailingIInInsert")
 call CreateShortcut("C-l", "ggdG", "in")
 
 " Pageup - Move up Line
-call CreateShortcut("PageUp", ":m-2<CR>", "inv", "restoreSelectionAfter")
+"call CreateShortcut("PageUp", ":m-2<CR>", "inv", "restoreSelectionAfter")
 
 " Pagedown - Move down Line
-call CreateShortcut("PageDown", ":m+<CR>", "in")
+"call CreateShortcut("PageDown", ":m+<CR>", "in")
 call CreateShortcut("PageDown", ":m'>+<CR>", "v", "restoreSelectionAfter")
 
 " Ctrl Pageup - Move up Line booster
