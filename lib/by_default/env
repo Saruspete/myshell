@@ -25,6 +25,10 @@ alias gg="getent group"
 alias sudo="sudo "
 
 alias ydiff="diff -y --suppress-common-lines"
+alias ..="cd .."
+alias ...="cd ../.."
+alias ....="cd ../../.."
+alias .....="cd ../../../.."
 
 
 # Term PS1 (default)
