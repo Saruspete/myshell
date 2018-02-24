@@ -52,3 +52,13 @@ function newop {
 	mkdir -p "$fold"
 	cd "$fold"
 }
+function lastop {
+	typeset -u filter="$1"
+	typeset fold="$HOME/OPERATIONS"
+	typeset last="$(\ls -dr $fold/*$filter* 2>/dev/null|head -n1)"
+	if [[ -n "$last" ]];
+		then cd "$last"
+	else
+		echo "No last operation found in $fold/*$filter*"
+	fi
+}
