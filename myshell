@@ -264,8 +264,11 @@ typeset mys_hostdom="${mys_hostfqdn#*.}"
 typeset MYS_RUNENV=""
 [[ -e /proc/1/mountinfo ]] && {
 	[[ "$(awk '$5=="/"{print $4}' /proc/1/mountinfo)" != "/" ]] && {
-		if [[ -d "/sys/fs/cgroup/memory/lxc/$mys_hostname*" ]]; then
+		#if [[ -d "/sys/fs/cgroup/memory/lxc/$mys_hostname*" ]]; then
+		if grep "/lxc/$mys_hostname" /proc/1/cgroup >/dev/null 2>&1; then
 			MYS_RUNENV="lxc"
+		elif grep "/docker/" /proc/1/cgroup >/dev/null 2>&1; then
+			MYS_RUNENV="docker"
 		else
 			MYS_RUNENV="chroot"
 		fi
