@@ -207,7 +207,7 @@ function mys_path_add {
 
 function mys_setopt {
 	if mys_isavail shopt; then
-		shopt $@ 
+		shopt $@
 	elif mys_isavail setopt; then
 		setopt $@
 	else
@@ -239,7 +239,7 @@ PROMPT_COMMAND="mys_promptfunc"
 	mys_setopt -s dotglob
 	for src in $MYSHELL_EXT/*; do
 		[[ -e "$src" ]] || continue
-	
+
 		echo "MyShell: Merging $src in $HOME"
 		mys_merge "$HOME" "$src"
 	done
@@ -265,7 +265,8 @@ typeset MYS_RUNENV=""
 [[ -e /proc/1/mountinfo ]] && {
 	[[ "$(awk '$5=="/"{print $4}' /proc/1/mountinfo)" != "/" ]] && {
 		#if [[ -d "/sys/fs/cgroup/memory/lxc/$mys_hostname*" ]]; then
-		if grep "/lxc/$mys_hostname" /proc/1/cgroup >/dev/null 2>&1; then
+		if grep "/lxc/$mys_hostname" /proc/1/cgroup >/dev/null 2>&1 || \
+		   grep "container=lxc" /proc/1/environ >/dev/null 2>&1; then
 			MYS_RUNENV="lxc"
 		elif grep "/docker/" /proc/1/cgroup >/dev/null 2>&1; then
 			MYS_RUNENV="docker"
