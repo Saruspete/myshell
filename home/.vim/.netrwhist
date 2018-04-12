@@ -1,6 +1,8 @@
 let g:netrw_dirhistmax  =10
-let g:netrw_dirhist_cnt =4
-let g:netrw_dirhist_1='/home/adrien/devel/myshell/bin'
-let g:netrw_dirhist_2='/home/adrien/devel/myshell'
-let g:netrw_dirhist_3='/home/adrien/devel/myshell/src'
-let g:netrw_dirhist_4='/home/adrien/tmp/motorola/rofl/com/motorola'
+let g:netrw_dirhist_cnt =6
+let g:netrw_dirhist_1='/home/ansible/bofh/roles/web-nginx'
+let g:netrw_dirhist_2='/home/ansible/bofh/roles/web-nginx/tasks'
+let g:netrw_dirhist_3='/home/ansible/bofh/filter_plugins'
+let g:netrw_dirhist_4='/home/ansible/bofh/roles/web-phpfpm/tasks'
+let g:netrw_dirhist_5='/home/ansible/bofh/roles/web-phpfpm'
+let g:netrw_dirhist_6='/home/ansible/bofh/roles/web-phpfpm/defaults'
