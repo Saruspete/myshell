@@ -33,7 +33,7 @@ function lsofdelete {
 }
 
 function psl {
-	ps -Leo tid,pid,ppid,user,state,cls,ni,pri,rtprio,psr,wchan:20,args
+	ps -Leo tid,pid,ppid,user,pcpu,rss:10,pmem,state,cls,ni,pri,rtprio,psr,wchan:20,args
 }
 ###########################################################
 #
