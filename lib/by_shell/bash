@@ -27,4 +27,4 @@ export C_WHI="${C_ESC}01;37m\]"
 
 typeset PS1PREF=""
 [[ -n "$MYS_RUNENV" ]] && PS1PREF="($MYS_RUNENV) "
-export PS1="${C_RED}${PS1PREF}\h${C_RST} ${C_GRN}[\t]${C_RST}${C_BLU}[\$?]${C_CYA}[\w]${C_RST} ${C_RST}"
+export PS1="${C_RED}${PS1PREF}\h${C_RST} ${C_GRN}[\t]${C_RST}${C_BLU}[\$?]${C_CYA}[\w]${C_RST}"
