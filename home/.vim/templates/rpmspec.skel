@@ -1,0 +1,146 @@
+# RPM Specfile template
+
+# List of available macros:
+# - https://github.com/rpm-software-management/rpm/blob/master/macros.in
+# - /etc/rpm/
+# - ~/.rpmmacros
+#
+# A single specfile can create multiple RPMs:
+# Declare a "%package myotherpackage" section, copy the following main section.
+# Add other and append the "myotherpackage" name to sections you want to customize.
+# eg:  %
+
+
+#
+# Main tags
+#
+Name:		MyPackage
+Summary:	Package to Manage MyPackage
+Version:	0.1
+Release:	1%{?dist}
+
+Vendor:		
+Packager:	Adrien Mahieux <adrien.mahieux@gmail.com>
+License:	GPLv3
+Group:		System Environment/Base
+
+#
+# Build parameters
+#
+BuildArch:	x86_64
+BuildRequires:
+
+Source0:	%{name}-%{version}.tar.gz
+
+#
+# Dependencies
+#
+#Requires:	package
+#Requires:	/bin/bash
+#Requires	otherpackage = 1.5
+
+# Provides must be binaries accessible through system paths
+# It can also be "virtual" packages
+#Provides:	virtualname = 1.0
+#Obsoletes:	
+#Conflicts:	
+
+# AutoRequires/Provides https://fedoraproject.org/wiki/AutoReqProv_(draft)
+# Only to be used if "noarch" or if "no binary provided in $PATH"
+AutoReqProv: no
+
+
+# =========================================================
+# Multi-line description
+# =========================================================
+%description
+
+
+# =========================================================
+# Preparation of the build environment
+# =========================================================
+%prep
+
+# Usual setup macro: tar -xf %{Source0} && cd %{name}-%{version}
+%setup
+# In case of non-standard prefix, use the -n option to specify folder name
+# %setup -n customfolder
+
+
+# =========================================================
+# Compilation of the source
+# =========================================================
+%build
+
+# %configure macro 
+#%configure
+%{make_build}
+
+
+# =========================================================
+# Installation in buildroot
+# =========================================================
+%install
+
+# Using RPM_BUILD_ROOT per https://www.redhat.com/archives/rpm-list/2002-July/msg00121.html
+[[ -n "$RPM_BUILD_ROOT" ]] && [[ "$RPM_BUILD_ROOT" != "/" ]] && rm -fr "$RPM_BUILD_ROOT"
+mkdir -p $RPM_BUILD_ROOT%{?prefix}
+
+# If the makefile provides "make install" supporting DESTDIR, you can use this:
+#%{make_install}
+
+# Else, just do it yourself
+#install -m644 -D mywrapper $RPMBUILD/usr/bin/mytool/mywrapper
+
+
+# =========================================================
+# Clean of the build environment
+# =========================================================
+%clean
+
+[[ -n "$RPM_BUILD_ROOT" ]] && [[ "$RPM_BUILD_ROOT" != "/" ]] && rm -fr "$RPM_BUILD_ROOT"
+
+
+# =========================================================
+# Files to be embedded in final RPM
+# =========================================================
+%files
+%defattr(-,root,root)
+
+# Replace specific attributes
+#%attr(755, root, root) %dir %{?prefix}/usr/bin/mytool
+#%attr(664, root,  grp)      %{?prefix}/usr/bin/mytool/mywrapper
+
+# Configuration files
+#%config(noreplace) %attr(664) %{?prefix}/etc/sysconfig/mytool
+
+
+# =========================================================
+# Scriptlets
+# =========================================================
+
+%pre
+# $1 == 1 => install
+# $1 == 2 => update
+
+%post
+# $1 == 1 => install
+# $1 == 2 => update
+
+%preun
+# $1 == 1 => uninstall
+# $2 == 2 => update
+
+%postun
+# $1 == 1 => uninstall
+# $2 == 2 => update
+
+
+# =========================================================
+# Changelog
+# =========================================================
+%changelog
+* Fri Apr 14 2017 Adrien Mahieux <adrien.mahieux@gmail.com>
+- initial specfile
+
+

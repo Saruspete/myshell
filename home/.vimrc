@@ -133,6 +133,7 @@ nnoremap <space> za
 
 " Skeletton
 au BufNewFile *.sh 0r ~/.vim/templates/bash.skel
+au BufNewFile *.spec 0r ~/.vim/templates/rpmspec.skel
 
 
 "
