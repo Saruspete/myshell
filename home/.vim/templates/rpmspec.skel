@@ -49,6 +49,8 @@ Source0:	%{name}-%{version}.tar.gz
 # Only to be used if "noarch" or if "no binary provided in $PATH"
 AutoReqProv: no
 
+# To remove debugging package
+%define debug_package %{nil}
 
 # =========================================================
 # Multi-line description
