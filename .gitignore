@@ -5,3 +5,4 @@ local
 *.swo
 *.priv
 run
+home/.vim/.netrwhist
