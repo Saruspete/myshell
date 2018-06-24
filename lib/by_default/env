@@ -1,6 +1,7 @@
 # vim: ft=sh
 
 # Some default path
+mys_path_binadd "~/.local/bin"
 mys_path_binadd "/usr/local/bin" "/usr/local/sbin"
 mys_path_manadd "/usr/local/share/man" 
 mys_path_libadd "/usr/local/lib" "/usr/X11R6/lib"
@@ -10,13 +11,13 @@ mys_path_binadd "/usr/symcli/bin" "/opt/VRTS/bin" "/opt/VRTSvcs/bin"
 mys_path_manadd "/usr/symcli/man" "/opt/VRTS/man" "/opt/VRTSvcs/man"
 
 
-
 # VIM FTW
 mys_isavail "vim" && export EDITOR="vim"
 
 # Aliases cause I'm lazy
 alias l="ls -al"
 alias s="screen -r"
+alias g="grep"
 alias gh="getent hosts"
 alias gp="getent passwd"
 alias gg="getent group"
