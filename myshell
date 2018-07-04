@@ -1,71 +1,82 @@
 # vim: ft=sh
 
+# This part of the script is meant to be POSIX compliant
+
 # Shell is non-interactive. Be done now
-[[ $- != *i* ]] && return
+# [[ $- != *i* ]] && return
+echo "$-" | grep i >/dev/null || return
+
+if [ -z "$HOME" ] || ! [ -d "$HOME" ]; then
+	echo "HOME is not defined or not a real folder. Please set it to a valid value"
+	return
+fi
+
+# Reset PATH to a somewhat standard value
+export PATH="/bin:/sbin:/usr/bin:/usr/sbin:$PATH"
 
 # use strict (cannot work with third party modules badly written...)
 #set -u
 
 # Configuration
-typeset MYSHELL_HUB="https://github.com/saruspete/myshell.git"
-typeset MYSHELL_DIR="$HOME/.myshell"
-typeset MYSHELL_LIB="$MYSHELL_DIR/lib"   # Shell env to be loaded
-typeset MYSHELL_BIN="$MYSHELL_DIR/bin"   # Local bin
-typeset MYSHELL_EXT="$MYSHELL_DIR/home"  # Home data to be merged
-typeset MYSHELL_LOC="$MYSHELL_DIR/local" # Local modifications
-typeset MYSHELL_RUN="$MYSHELL_DIR/run"   # Cache
-typeset MYSHELL_LCK="$MYSHELL_DIR/.initialized"
+MYSHELL_HUB="https://github.com/saruspete/myshell.git"
+MYSHELL_DIR="$HOME/.myshell"
+MYSHELL_LIB="$MYSHELL_DIR/lib"   # Shell env to be loaded
+MYSHELL_BIN="$MYSHELL_DIR/bin"   # Local bin
+MYSHELL_EXT="$MYSHELL_DIR/home"  # Home data to be merged
+MYSHELL_LOC="$MYSHELL_DIR/local" # Local modifications
+MYSHELL_RUN="$MYSHELL_DIR/run"   # Cache
+MYSHELL_LCK="$MYSHELL_DIR/.initialized"
 
 # #####################################
 # Helper subs
 
-function mys_date {
+mys_date () {
 	date +'%Y-%m-%d_%H-%M-%S'
 }
 
-function mys_merge {
-	typeset dir="$1"
-	typeset src="$2"
-	typeset name="${src##*/}"
-	typeset dst="$dir/$name"
+mys_merge () {
+	dir="$1"
+	src="$2"
+	name="${src##*/}"
+	dst="$dir/$name"
 
-	[[ -L "$dst" ]] && {
+	if [ -L "$dst" ]; then
 		echo "MyShell: cannot merge '$src' with '$dst': Target is a symlink"
 		return 1
-	}
+	fi
 
 	# If target file exists, try to merge files
-	if [[ -e "$dst" ]]; then
+	if [ -e "$dst" ]; then
 		# Prepare the merge
-		typeset loc="$MYSHELL_LOC/$name"
+		loc="$MYSHELL_LOC/$name"
 		cp -a "$dst" "$loc"
 
 		# Backup local and clear destination
-		mv "$dst" "${dst}.mys.$(date +'%y%m%d_%H%M%S')"
+		mv "$dst" "${dst}.mys.$(mys_date)"
 
 		# Try to merge if file
-		[[ -f "$loc" ]] && {
+		if [ -f "$loc" ]; then
 			cat "$src" >> "$loc"
 			src="$loc"
-		}
+		fi
 	fi
 
 	# Symlink to source
 	ln -s "${src#$dir/}" "$dst"
 }
 
-function mys_isavail {
+mys_isavail () {
 	type $1 >/dev/null 2>&1
 }
 
 # update from origin
-function mys_update {
-	mys_isavail "git" || {
+mys_update () {
+	if ! mys_isavail "git"; then
 		echo "You need git to update MyShell automatically"
 		return 1
-	}
+	fi
 
-	if [[ -e "$MYSHELL_DIR/.git" ]]; then
+	if [ -e "$MYSHELL_DIR/.git" ]; then
 		git -C "$MYSHELL_DIR" pull
 	else
 		git clone "$MYSHELL_HUB" "$MYSHELL_DIR"
@@ -73,49 +84,54 @@ function mys_update {
 }
 
 # sync and send to another local hosts
-function mys_sync {
+mys_sync () {
 	typeset hosts="$@"
 	for h in $hosts; do
 		echo "MyShell: Syncing $h"
-		ssh $h '[ -e $HOME/.myshell ] || mkdir "$HOME/.myshell"; for i in $HOME/{.bashrc,.profile}; do [ -e "$i" ] || ln -s .myshell/myshell $i; done' 2>/dev/null
+		ssh $h 2>/dev/null <<-EOT
+		[ -e $HOME/.myshell ] || mkdir "$HOME/.myshell"
+		for i in $HOME/{.bashrc,.profile}; do
+			[ -e "$i" ] || ln -s .myshell/myshell $i
+		done 
+		EOT
 		rsync -a "$MYSHELL_DIR/" $h:
 	done
 }
 
-function mys_reload {
-	source "$MYSHELL_DIR/myshell"
+mys_reload () {
+	. "$MYSHELL_DIR/myshell"
 }
 
 # Load
-function mys_loadmod {
-	typeset mod="$1"
-	typeset val="$2"
+mys_loadmod () {
+	mod="$1"
+	val="$2"
 
-	[[ -z "$val" ]] && return
+	[ -z "$val" ] && return
 	for file in $MYSHELL_LIB/by_$mod/$val; do
-		[[ -e "$file" ]] || continue
+		[ -e "$file" ] || continue
 		. "$file"
 	done
 }
 
 # 
-function mys_cacherun {
-	typeset name="$1"; shift
+mys_cacherun () {
+	name="$1"; shift
 
-	[[ -n "$name" ]] && [[ -n "$@" ]] || {
+	if [ -z "$name" ] || [ -z "$@" ]; then
 		echo "MyShell: Usage: mys_cacherun <name> <command>" >&2
 		return 1
-	}
+	fi
 
-	typeset date="$(mys_date)"
-	typeset cachepath="$MYSHELL_RUN/cache/${name}/"
-	[[ -d "$cachepath" ]] || mkdir -p "$cachepath"
-	typeset cachefile="$cachepath/$date"
+	date="$(mys_date)"
+	cachepath="$MYSHELL_RUN/cache/${name}/"
+	[ -d "$cachepath" ] || mkdir -p "$cachepath"
+	cachefile="$cachepath/$date"
 
 	# Get start time, execute the command, write metadata, write output
-	typeset start="$(mys_date)"
-	typeset result=""; result="$($@)"
-	typeset rescode="$?"
+	start="$(mys_date)"
+	result="$($@)"
+	rescode="$?"
 	echo -n "'$@' # \$?=$rescode # $start # $(mys_date)" >| "$cachefile.meta"
 	echo "$result" | tee "$cachefile.out"
 	# Set it as the last file
@@ -125,78 +141,78 @@ function mys_cacherun {
 	return $rescode
 }
 
-function mys_cachelist {
-	typeset name="$1"
+mys_cachelist () {
+	name="$1"
 
-	[[ -z "$name" ]] && {
+	[ -z "$name" ] && {
 		echo "MyShell: Usage: mys_cachelist <name>" >&2
 		return 1
 	}
 
-	typeset cachepath="$MYSHELL_RUN/cache/$name/"
+	cachepath="$MYSHELL_RUN/cache/$name/"
 	for out in $cachepath/*.out; do
-		[[ ! -e "$out" ]] && continue
-		echo "${out##*/}  ( $(< ${out%.out}.meta) )"
+		[ ! -e "$out" ] && continue
+		echo "${out##*/}  ( $(cat ${out%.out}.meta) )"
 	done
 }
 
-function mys_cacheget {
-	typeset name="$1"
-	typeset vers="${2:-last}"
+mys_cacheget () {
+	name="$1"
+	vers="${2:-last}"
 
-	[[ -z "$name" ]] && {
+	if [ -z "$name" ]; then
 		echo "MyShell: Usage: mys_cacheget <name> [version]" >&2
 		return 1
-	}
+	fi
 
-	typeset cachepath="$MYSHELL_RUN/cache/$name"
-	[[ ! -e "${cachepath}/${vers}.out" ]] && {
+	cachepath="$MYSHELL_RUN/cache/$name"
+	if ! [ -e "${cachepath}/${vers}.out" ]; then
 		echo "MyShell: No version of '$name' matches '$vers'" >&2
 		return 2
-	}
+	fi
 	# Output the file
 	cat "$cachepath/${vers}.out"
 }
 
-function mys_cacheclear {
+mys_cacheclear () {
 	:
 }
 
 # #####################################
 # Environement management
 
-function mys_path_binadd {
+mys_path_binadd () {
 	mys_path_add "PATH" $@
 }
 
-function mys_path_manadd {
+mys_path_manadd () {
 	mys_path_add "MANPATH" $@
 }
 
-function mys_path_libadd {
+mys_path_libadd () {
 	mys_path_add "LB_LIBRARY_PATH" $@
 }
 
 
-function mys_path_add {
-	typeset var="$1"; shift
-	typeset where="$1"
-	if [[ "$where" == "before" ]] || [[ "$where" == "after" ]]; then
+mys_path_add () {
+	var="$1"; shift
+	where="$1"
+	if [ "$where" = "before" ] || [ "$where" = "after" ]; then
 		shift
 	fi
 
-	for newpath in $@; do
+	for newpath in "$@"; do
 		OIFS="$IFS"
 		IFS=":"
 		for p in $PATH; do
-			[[ "$newpath" == "$p" ]] && {
+			[ "$newpath" = "$p" ] && {
 				IFS="$OIFS"
 				continue 2
 			}
 		done
 		IFS="$OIFS"
 		# Where to add the path
-		if [[ "$where" == "before" ]]; then
+		if [ "$where" = "before" ]; then
 			eval export $var="$newpath:\$$var"
 		else
 			eval export $var="\$$var:$newpath"
@@ -205,7 +221,7 @@ function mys_path_add {
 
 }
 
-function mys_setopt {
+mys_setopt () {
 	if mys_isavail shopt; then
 		shopt $@
 	elif mys_isavail setopt; then
@@ -217,28 +233,30 @@ function mys_setopt {
 }
 
 
-typeset -i MYS_LOADTIME="$(date +%s)"
-function mys_promptfunc {
+# That should be a typeset -i but POSIX...
+MYS_LOADTIME="$(date +%s)"
+mys_promptfunc () {
 	# Reload configuration if witness flag is present
-	[[ -e "$MYSHELL_DIR/.reload" ]] &&
-	[[ "$(<$MYSHELL_DIR/.reload)" -gt "$MYS_LOADTIME" ]] && {
+	if [ -e "$MYSHELL_DIR/.reload" ] &&	[ "$(cat $MYSHELL_DIR/.reload)" -gt "$MYS_LOADTIME" ]; then
 		mys_reload
-	}
+	fi
 
 	# Do extended tests if needed.
 }
 PROMPT_COMMAND="mys_promptfunc"
 
+
+
 # #####################################
 # Main processing
 
 # Load external configuration files
-[[ -e "$MYSHELL_LCK" ]] || {
+if ! [ -e "$MYSHELL_LCK" ]; then
 	echo "MyShell: Initializing local configuration files"
-	typeset src=""
+	src=""
 	mys_setopt -s dotglob
 	for src in $MYSHELL_EXT/*; do
-		[[ -e "$src" ]] || continue
+		[ -e "$src" ] || continue
 
 		echo "MyShell: Merging $src in $HOME"
 		mys_merge "$HOME" "$src"
@@ -246,24 +264,24 @@ PROMPT_COMMAND="mys_promptfunc"
 	mys_setopt -u dotglob
 
 	date +'%y%m%d_%H%M%S' >| "$MYSHELL_LCK"
-}
+fi
 
 # Add custom binaries to PATH
 mys_path_binadd "$MYSHELL_BIN"
 
 # Domains
-typeset mys_hostname="$(uname -n)"
-typeset mys_hostfqdn="$(getent hosts $mys_hostname|awk 'END{print $2}')"
-typeset mys_hostdom="${mys_hostfqdn#*.}"
-[[ "$mys_hostdom" == "$mys_hostfqdn" ]] && {
+mys_hostname="$(uname -n)"
+mys_hostfqdn="$(getent hosts $mys_hostname|awk 'END{print $2}')"
+mys_hostdom="${mys_hostfqdn#*.}"
+if [ "$mys_hostdom" = "$mys_hostfqdn" ]; then
 	mys_hostdom=""
-}
+fi
 
 
 # Try to guess our running env (chroot, jail, VM...)
-typeset MYS_RUNENV=""
-[[ -e /proc/1/mountinfo ]] && {
-	[[ "$(awk '$5=="/"{print $4}' /proc/1/mountinfo)" != "/" ]] && {
+MYS_RUNENV=""
+if [ -e /proc/1/mountinfo ]; then
+	if [ "$(awk '$5=="/"{print $4}' /proc/1/mountinfo)" != "/" ]; then
 		#if [[ -d "/sys/fs/cgroup/memory/lxc/$mys_hostname*" ]]; then
 		if grep "/lxc/$mys_hostname" /proc/1/cgroup >/dev/null 2>&1 || \
 		   grep "container=lxc" /proc/1/environ >/dev/null 2>&1; then
@@ -273,16 +291,16 @@ typeset MYS_RUNENV=""
 		else
 			MYS_RUNENV="chroot"
 		fi
-	}
-}
+	fi
+fi
 
 
 # Load per-shell definitions
-typeset mys_shellname="${0##*/}"
+mys_shellname="${0##*/}"
 mys_shellname="${mys_shellname#-}"
-typeset mys_custom="$MYSHELL_DIR/myshell.${mys_shellname}"
-if [[ -e "$mys_custom" ]]; then
-	source "$mys_custom"
+mys_custom="$MYSHELL_DIR/myshell.${mys_shellname}"
+if [ -e "$mys_custom" ]; then
+	. "$mys_custom"
 else
 	echo "MyShell: No custom file found for shell '$0'"
 fi
