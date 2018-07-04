@@ -1,0 +1,73 @@
+# vim: ft=sh
+
+# Open a console
+function gethosts {
+	getent hosts "$@" | awk '{print $NF}'
+}
+function getips {
+	getent hosts "$@" | awk '{print $1}'
+}
+
+function tryssh {
+	# Get all matching hosts
+	typeset -a hosts=($(gethosts $@))
+	
+	# No matching host
+	[[ ${#hosts[@]} -eq 0 ]] && {
+		echo "No matching host found"
+		return 1
+	}
+	# Multiple hosts
+	[[ ${#hosts[@]} -gt 1 ]] && {
+		typeset -a sellst=("(ALL)")
+		# Add the IP for more hints
+		for h in "${hosts[@]}"; do
+			sellst[${#sellst[@]}]="$h ($(getips $h))"
+		done
+
+		echo "Multiple hosts matched. Select your target: "
+		select opt in "${sellst[@]}"; do
+			case $opt in
+				'(ALL)')
+					break
+					;;
+				*)
+					# remove the additional IP hint
+					hosts=(${opt%% *})
+					break
+					;;
+			esac
+		done
+	}
+
+	# Process all selected hosts
+	for h in ${hosts[@]}; do
+		ssh $h
+	done
+}
+
+function ipmi {
+	typeset host="$1"; shift
+
+	# Check if $1 is a helper. If so, use it
+	[[ "$(\type -t "$host" 2>/dev/null)" == "function" ]] && {
+		typeset helper="$host"
+		host="$1"
+		shift
+		host="$($helper $host)"
+	}
+
+	# IPMI Command
+	typeset cmd="$@"
+
+	typeset user="root"
+	typeset pass="calvin"
+
+	[[ -n "$pass" ]] && export IPMI_PASSWORD="$pass"
+	ipmitool -I lanplus -U $user -E -n $host $cmd
+}
+
+function ipmisol {
+	ipmi "$1" "sol deactivate instance=1"
+	ipmi "$1" "-e [ sol activate instance=1"
+}

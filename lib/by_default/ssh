@@ -25,7 +25,7 @@ function ssh-agent-start {
 			return
 		else
 			echo "Stale ($lockpid) detected. Removing lockfile"
-			rm $lockfile
+			\rm $lockfile
 		fi
 	}
 	set +o noclobber
@@ -44,7 +44,7 @@ function ssh-agent-start {
 	source "$SSH_ENV" > /dev/null
 	ssh-add
 
-	rm "$lockfile"
+	\rm "$lockfile"
 }
 
 

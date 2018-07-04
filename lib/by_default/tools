@@ -32,6 +32,9 @@ function lsofdelete {
 	runasroot lsof 2>/dev/null| awk '/deleted/{print $(NF-3),$0}' | sort -n
 }
 
+function psl {
+	ps -Leo tid,pid,ppid,user,pcpu,rss:10,pmem,state,cls,ni,pri,rtprio,psr,wchan:20,args
+}
 ###########################################################
 #
 # Network tools
