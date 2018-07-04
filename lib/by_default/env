@@ -1,7 +1,7 @@
 # vim: ft=sh
 
 # Some default path
-mys_path_binadd "~/.local/bin"
+mys_path_binadd "~/bin" "~/.local/bin"
 mys_path_binadd "/usr/local/bin" "/usr/local/sbin"
 mys_path_manadd "/usr/local/share/man" 
 mys_path_libadd "/usr/local/lib" "/usr/X11R6/lib"
