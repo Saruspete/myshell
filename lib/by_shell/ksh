@@ -1,0 +1,30 @@
+# vim: ft=sh
+
+# The \[ and \] chars are here to make bash avoid counting them as words and
+# messing up PS1.
+export C_ESC="["
+export C_RST="${C_ESC}0m"
+export C_RED="${C_ESC}01;31m"
+export C_GRN="${C_ESC}01;32m"
+export C_YEL="${C_ESC}01;33m"
+export C_BLU="${C_ESC}01;34m"
+export C_CYA="${C_ESC}01;36m"
+export C_WHI="${C_ESC}01;37m"
+
+typeset PS1PREF=""
+[[ -n "$MYS_RUNENV" ]] && PS1PREF="($MYS_RUNENV) "
+
+
+unset _h _m _s
+eval $(date "+_h=%H ;_m=%M ;_s=%S")
+((SECONDS = 3600*${_h#0}+60*${_m#0}+${_s#0}))
+typeset -Z2 _h _m _s
+_tsub="(_m=(SECONDS/60%60)) == (_h=(SECONDS/3600%24)) + (_s=(SECONDS%60))"
+_timehm='${_x[_tsub]}$_h:${_m}'
+_timehms='${_x[_tsub]}$_h:$_m:${_s}'
+
+
+
+#export PS1="${C_RED}${PS1PREF}$(uname -n)${C_RST} ${C_GRN}[$_timehms]${C_RST}${C_BLU}[\${PIPESTATUS[@]}]${C_CYA}[$(pwd)]${C_RST} "
+export PS1='$(r=$?; print -n "${C_RED}${PS1PREF}$(uname -n)${C_RST} ${C_GRN}[$(date +%H:%M:%S)]${C_RST}${C_BLU}[$r]${C_CYA}[${PWD#$HOME/}]${C_RST} ")'
+
