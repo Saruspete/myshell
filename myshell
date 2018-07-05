@@ -237,8 +237,9 @@ mys_setopt () {
 MYS_LOADTIME="$(date +%s)"
 mys_promptfunc () {
 	# Reload configuration if witness flag is present
-	if [ -e "$MYSHELL_DIR/.reload" ] &&	[ "$(cat $MYSHELL_DIR/.reload)" -gt "$MYS_LOADTIME" ]; then
-		mys_reload
+	if [ -s "$MYSHELL_DIR/.reload" ]; then
+		time="$(cat $MYSHELL_DIR/.reload | tr -cd '[0-9]')"
+		[ "${time:-0}" -gt "$MYS_LOADTIME" ] && mys_reload
 	fi
 
 	# Do extended tests if needed.
