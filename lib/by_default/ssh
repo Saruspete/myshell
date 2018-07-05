@@ -1,15 +1,15 @@
 # vim: ft=sh
 
 typeset SSH_ENV="$HOME/.ssh/environment"
-function ssh-agent-start {
+ssh_agent_start () {
 	typeset lockfile="$SSH_ENV.lock"
 	typeset locktime=5
 
 	# Do a basic lock
-	[[ -s "$lockfile" ]] && {
+	[ -s "$lockfile" ] && {
 		echo "Lockfile $lockfile exists. Waiting $locktime secs for release"
 		for i in $(seq $locktime); do
-			[[ -e "$lockfile" ]] || break
+			[ -e "$lockfile" ] || break
 			sleep 1
 		done
 	}
@@ -19,9 +19,9 @@ function ssh-agent-start {
 	echo $$ > "$lockfile" || {
 		sleep "$(($RANDOM%2)).$(($RANDOM%100))"
 		typeset lockpid="$(cat $lockfile 2>/dev/null)"
-		if [[ -e "/proc/$lockpid/" ]]; then
+		if [ -e "/proc/$lockpid/" ]; then
 			echo "Race detected. Restarting sequence"
-			ssh-agent-start
+			ssh_agent_start
 			return
 		else
 			echo "Stale ($lockpid) detected. Removing lockfile"
@@ -31,9 +31,9 @@ function ssh-agent-start {
 	set +o noclobber
 
 	# If we see a file, try to use it
-	[[ -s $SSH_ENV ]] && {
-		source "$SSH_ENV" > /dev/null
-		[[ -e "/proc/$SSH_AGENT_PID/exe" ]] && return
+	[ -s $SSH_ENV ] && {
+		. "$SSH_ENV" > /dev/null
+		[ -e "/proc/$SSH_AGENT_PID/exe" ] && return
 	}
 
 	# Start the agent
@@ -49,15 +49,15 @@ function ssh-agent-start {
 
 
 # Auto start the agent
-if [[ -f "$SSH_ENV" ]]; then
-	source "$SSH_ENV" > /dev/null
+if [ -f "$SSH_ENV" ]; then
+	. "$SSH_ENV" > /dev/null
 
 	# If the file exists, check its still valid
-	[[ -e /proc/$SSH_AGENT_PID ]] && \
-	[[ "$(cat /proc/$SSH_AGENT_PID/loginuid)" == "$(id -u)" ]] || {
+	[ -e "/proc/$SSH_AGENT_PID" ] && \
+	[ "$(cat "/proc/$SSH_AGENT_PID/loginuid")" == "$(id -u)" ] || {
 		echo "Stale ssh environment file. Restarting"
-		ssh-agent-start
+		ssh_agent_start
 	}
 else
-	ssh-agent-start
+	ssh_agent_start
 fi
