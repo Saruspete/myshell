@@ -1,6 +1,16 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-typeset MYSELF="$(readlink -f $0)"
-typeset MYPATH="${MYSELF%/*}"
+set -o nounset
+set -o noclobber
 
+export LC_ALL=C
+export PATH="/bin:/sbin:/usr/bin:/usr/sbin:$PATH"
+
+readonly MYSELF="$(readlink -f $0)"
+readonly MYPATH="${MYSELF%/*}"
+readonly MYTEMP="$MYPATH/temp/run.$$"
+
+mkdir -p "$MYTEMP"
+# If needed to cleanup
+# trap '(rm -fr $MYTEMP)' TERM QUIT INT
 
