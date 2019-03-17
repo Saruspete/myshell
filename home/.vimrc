@@ -68,7 +68,8 @@ omap s :normal vs<CR>
 
 " 80 & 120 column display
 "let &colorcolumn=join(range(81,999),",")
-let &colorcolumn="80,".join(range(120,999),",")
+"let &colorcolumn="80,".join(range(120,999),",")
+let &colorcolumn="80,120"
 "highlight ColorColumn ctermbg=235 guibg=#2c2d27
 
 " Buffering
@@ -297,9 +298,9 @@ function! OpenLastBufferInNewTab()
 endfunction
 function! ToggleColorColumn()
     if &colorcolumn != 0
-        windo let &colorcolumn = 0
+        windo let &colorcolumn = "0"
     else
-        windo let &colorcolumn = 80
+        windo let &colorcolumn = "80,120"
     endif
 endfunction
 function! MyPasteToggle()
@@ -448,8 +449,8 @@ call CreateShortcut("A-Left", "gT", "inv")
 " F2 - Paste toggle
 call CreateShortcut("f2",":call MyPasteToggle()<CR>", "n")
 
-" F3 - Line numbers toggle
-call CreateShortcut("f3",":set nonumber!<CR>", "in")
+" F3 - Display toggle
+call CreateShortcut("f3",":set nonumber!<CR>:set nolist!<CR>:call ToggleColorColumn()<CR>:set nocursorline!<CR>", "in")
 
 " F4 - Panic Button
 call CreateShortcut("f4","mzggg?G`z", "inv")
