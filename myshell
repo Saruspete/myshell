@@ -102,6 +102,10 @@ mys_reload () {
 	. "$MYSHELL_DIR/myshell"
 }
 
+mys_reloadall () {
+	date +%s >| "$MYSHELL_DIR/.reload"
+}
+
 # Load
 mys_loadmod () {
 	mod="$1"
