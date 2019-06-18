@@ -35,10 +35,10 @@ mys_date () {
 }
 
 mys_merge () {
-	dir="$1"
-	src="$2"
-	name="${src##*/}"
-	dst="$dir/$name"
+	typeset dir="$1"
+	typeset src="$2"
+	typeset name="${src##*/}"
+	typeset dst="$dir/$name"
 
 	if [ -L "$dst" ]; then
 		echo "MyShell: cannot merge '$src' with '$dst': Target is a symlink"
@@ -48,7 +48,7 @@ mys_merge () {
 	# If target file exists, try to merge files
 	if [ -e "$dst" ]; then
 		# Prepare the merge
-		loc="$MYSHELL_LOC/$name"
+		typeset loc="$MYSHELL_LOC/$name"
 		cp -a "$dst" "$loc"
 
 		# Backup local and clear destination
@@ -108,8 +108,8 @@ mys_reloadall () {
 
 # Load
 mys_loadmod () {
-	mod="$1"
-	val="$2"
+	typeset mod="$1"
+	typeset val="$2"
 
 	[ -z "$val" ] && return
 	for file in $MYSHELL_LIB/by_$mod/$val; do
@@ -120,22 +120,22 @@ mys_loadmod () {
 
 # 
 mys_cacherun () {
-	name="$1"; shift
+	typeset name="$1"; shift
 
 	if [ -z "$name" ] || [ -z "$@" ]; then
 		echo "MyShell: Usage: mys_cacherun <name> <command>" >&2
 		return 1
 	fi
 
-	date="$(mys_date)"
-	cachepath="$MYSHELL_RUN/cache/${name}/"
+	typeset date="$(mys_date)"
+	typeset cachepath="$MYSHELL_RUN/cache/${name}/"
 	[ -d "$cachepath" ] || mkdir -p "$cachepath"
-	cachefile="$cachepath/$date"
+	typeset cachefile="$cachepath/$date"
 
 	# Get start time, execute the command, write metadata, write output
-	start="$(mys_date)"
-	result="$($@)"
-	rescode="$?"
+	typeset start="$(mys_date)"
+	typeset result="$($@)"
+	typeset rescode="$?"
 	echo -n "'$@' # \$?=$rescode # $start # $(mys_date)" >| "$cachefile.meta"
 	echo "$result" | tee "$cachefile.out"
 	# Set it as the last file
@@ -146,14 +146,14 @@ mys_cacherun () {
 }
 
 mys_cachelist () {
-	name="$1"
+	typeset name="$1"
 
 	[ -z "$name" ] && {
 		echo "MyShell: Usage: mys_cachelist <name>" >&2
 		return 1
 	}
 
-	cachepath="$MYSHELL_RUN/cache/$name/"
+	typeset cachepath="$MYSHELL_RUN/cache/$name/"
 	for out in $cachepath/*.out; do
 		[ ! -e "$out" ] && continue
 		echo "${out##*/}  ( $(cat ${out%.out}.meta) )"
@@ -161,15 +161,15 @@ mys_cachelist () {
 }
 
 mys_cacheget () {
-	name="$1"
-	vers="${2:-last}"
+	typeset name="$1"
+	typeset vers="${2:-last}"
 
 	if [ -z "$name" ]; then
 		echo "MyShell: Usage: mys_cacheget <name> [version]" >&2
 		return 1
 	fi
 
-	cachepath="$MYSHELL_RUN/cache/$name"
+	typeset cachepath="$MYSHELL_RUN/cache/$name"
 	if ! [ -e "${cachepath}/${vers}.out" ]; then
 		echo "MyShell: No version of '$name' matches '$vers'" >&2
 		return 2
@@ -199,14 +199,14 @@ mys_path_libadd () {
 
 
 mys_path_add () {
-	var="$1"; shift
-	where="$1"
+	typeset var="$1"; shift
+	typeset where="$1"
 	if [ "$where" = "before" ] || [ "$where" = "after" ]; then
 		shift
 	fi
 
 	for newpath in "$@"; do
-		OIFS="$IFS"
+		typeset OIFS="$IFS"
 		IFS=":"
 		for p in $PATH; do
 			[ "$newpath" = "$p" ] && {
@@ -242,7 +242,7 @@ MYS_LOADTIME="$(date +%s)"
 mys_promptfunc () {
 	# Reload configuration if witness flag is present
 	if [ -s "$MYSHELL_DIR/.reload" ]; then
-		time="$(cat $MYSHELL_DIR/.reload | tr -cd '[0-9]')"
+		typeset time="$(cat $MYSHELL_DIR/.reload | tr -cd '[0-9]')"
 		[ "${time:-0}" -gt "$MYS_LOADTIME" ] && mys_reload
 	fi
 
@@ -258,7 +258,7 @@ PROMPT_COMMAND="mys_promptfunc"
 # Load external configuration files
 if ! [ -e "$MYSHELL_LCK" ]; then
 	echo "MyShell: Initializing local configuration files"
-	src=""
+	typeset src=""
 	mys_setopt -s dotglob
 	for src in $MYSHELL_EXT/*; do
 		[ -e "$src" ] || continue
