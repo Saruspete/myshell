@@ -35,6 +35,18 @@ function lsofdelete {
 function psl {
 	ps -Leo tid,pid,ppid,user,pcpu,rss:10,pmem,state,cls,ni,pri,rtprio,psr,wchan:20,args
 }
+
+
+###########################################################
+#
+# Storage tools
+#
+function genrandom {
+	pass="$(dd if=/dev/urandom bs=128 count=1 2>/dev/null | base64)"
+	dd if=/dev/zero bs=16M count=16 | \
+		openssl enc -aes-256-ctr -pass pass:"$pass" -nosalt
+}
+
 ###########################################################
 #
 # Network tools
