@@ -62,9 +62,9 @@ function httpheaders {
 }
 
 function testport {
-	typeset srv="$1"
-	typeset prt="$2"
-	typeset proto="${3-:tcp}"
+	typeset server="$1"
+	typeset port="$2"
+	typeset proto="${3:-tcp}"
 	exec 5<>/dev/$proto/$server/$port
 	[[ $? -eq 0 ]] && exec 5<&-
 }
