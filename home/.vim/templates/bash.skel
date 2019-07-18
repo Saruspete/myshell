@@ -5,12 +5,9 @@ set -o noclobber
 
 export LC_ALL=C
 export PATH="/bin:/sbin:/usr/bin:/usr/sbin:$PATH"
+export PS4=' (${BASH_SOURCE##*/}::${FUNCNAME[0]:-main}::$LINENO)  '
 
 readonly MYSELF="$(readlink -f $0)"
 readonly MYPATH="${MYSELF%/*}"
-readonly MYTEMP="$MYPATH/temp/run.$$"
 
-mkdir -p "$MYTEMP"
-# If needed to cleanup
-# trap '(rm -fr $MYTEMP)' TERM QUIT INT
 
