@@ -30,11 +30,11 @@ MYSHELL_LCK="$MYSHELL_DIR/.initialized"
 # #####################################
 # Helper subs
 
-mys_date () {
+function mys_date {
 	date +'%Y-%m-%d_%H-%M-%S'
 }
 
-mys_merge () {
+function mys_merge {
 	typeset dir="$1"
 	typeset src="$2"
 	typeset name="${src##*/}"
@@ -65,12 +65,12 @@ mys_merge () {
 	ln -s "${src#$dir/}" "$dst"
 }
 
-mys_isavail () {
+function mys_isavail {
 	type $1 >/dev/null 2>&1
 }
 
 # update from origin
-mys_update () {
+function mys_update {
 	if ! mys_isavail "git"; then
 		echo "You need git to update MyShell automatically"
 		return 1
@@ -84,7 +84,7 @@ mys_update () {
 }
 
 # sync and send to another local hosts
-mys_sync () {
+function mys_sync {
 	typeset hosts="$@"
 	for h in $hosts; do
 		echo "MyShell: Syncing $h"
@@ -98,28 +98,28 @@ mys_sync () {
 	done
 }
 
-mys_reload () {
+function mys_reload {
 	. "$MYSHELL_DIR/myshell"
 }
 
-mys_reloadall () {
+function mys_reloadall {
 	date +%s >| "$MYSHELL_DIR/.reload"
 }
 
 # Load
-mys_loadmod () {
+function mys_loadmod {
 	typeset mod="$1"
 	typeset val="$2"
 
 	[ -z "$val" ] && return
 	for file in $MYSHELL_LIB/by_$mod/$val; do
-		[ -e "$file" ] || continue
+		[[ -f "$file" ]] && [[ -s "$file" ]] || continue
 		. "$file"
 	done
 }
 
 # 
-mys_cacherun () {
+function mys_cacherun {
 	typeset name="$1"; shift
 
 	if [ -z "$name" ] || [ -z "$@" ]; then
@@ -145,7 +145,7 @@ mys_cacherun () {
 	return $rescode
 }
 
-mys_cachelist () {
+function mys_cachelist {
 	typeset name="$1"
 
 	[ -z "$name" ] && {
@@ -160,7 +160,7 @@ mys_cachelist () {
 	done
 }
 
-mys_cacheget () {
+function mys_cacheget {
 	typeset name="$1"
 	typeset vers="${2:-last}"
 
@@ -178,27 +178,27 @@ mys_cacheget () {
 	cat "$cachepath/${vers}.out"
 }
 
-mys_cacheclear () {
+function mys_cacheclear {
 	:
 }
 
 # #####################################
 # Environement management
 
-mys_path_binadd () {
+function mys_path_binadd {
 	mys_path_add "PATH" $@
 }
 
-mys_path_manadd () {
+function mys_path_manadd {
 	mys_path_add "MANPATH" $@
 }
 
-mys_path_libadd () {
+function mys_path_libadd {
 	mys_path_add "LB_LIBRARY_PATH" $@
 }
 
 
-mys_path_add () {
+function mys_path_add {
 	typeset var="$1"; shift
 	typeset where="$1"
 	if [ "$where" = "before" ] || [ "$where" = "after" ]; then
@@ -225,7 +225,7 @@ mys_path_add () {
 
 }
 
-mys_setopt () {
+function mys_setopt {
 	if mys_isavail shopt; then
 		shopt $@
 	elif mys_isavail setopt; then
@@ -236,32 +236,45 @@ mys_setopt () {
 	fi
 }
 
+# Only show at startup
+if [[ -z "$MYS_LOADTIME" ]] && [[ -n "$PROMPT_COMMAND" ]]; then
+	echo >&2 "Warning: \$PROMPT_COMMAND is already set: '$PROMPT_COMMAND'"
+fi
 
 # That should be a typeset -i but POSIX...
-MYS_LOADTIME="$(date +%s)"
-mys_promptfunc () {
+typeset    MYS_LOADTIME="$(date +%s)"
+typeset -a MYS_PROMPTFUNCCB=()
+function mys_promptfunc {
+	typeset retcode=${1:-$?}
+
 	# Reload configuration if witness flag is present
-	if [ -s "$MYSHELL_DIR/.reload" ]; then
+	if [[ -s "$MYSHELL_DIR/.reload" ]]; then
 		typeset time="$(cat $MYSHELL_DIR/.reload | tr -cd '[0-9]')"
-		[ "${time:-0}" -gt "$MYS_LOADTIME" ] && mys_reload
+		[[ "${time:-0}" -gt "$MYS_LOADTIME" ]] && mys_reload
 	fi
 
-	# Do extended tests if needed.
+	typeset cb
+	for cb in ${MYS_PROMPTFUNCCB[@]}; do
+		[[ -n "$cb" ]] || continue
+		$cb $retcode
+	done
 }
-PROMPT_COMMAND="mys_promptfunc"
 
+function mys_promptfunc_register {
+	MYS_PROMPTFUNCCB+=("$*")
+}
 
 
 # #####################################
 # Main processing
 
 # Load external configuration files
-if ! [ -e "$MYSHELL_LCK" ]; then
+if ! [[ -e "$MYSHELL_LCK" ]]; then
 	echo "MyShell: Initializing local configuration files"
 	typeset src=""
 	mys_setopt -s dotglob
 	for src in $MYSHELL_EXT/*; do
-		[ -e "$src" ] || continue
+		[[ -e "$src" ]] || continue
 
 		echo "MyShell: Merging $src in $HOME"
 		mys_merge "$HOME" "$src"
@@ -323,3 +336,5 @@ mys_loadmod "host" "$mys_hostname.priv"
 mys_loadmod "user" "$(id -nu)"
 mys_loadmod "user" "$(id -nu).priv"
 
+
+PROMPT_COMMAND='mys_promptfunc $?'
