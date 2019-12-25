@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+set -o nounset
+set -o noclobber
+
+typeset MYSELF="$(readlink -f $0)"
+typeset MYPATH="${MYSELF%/*}"
+
+source "$MYPATH/../ammlib/ammlib"
+
+ammLib::Require http
+
+typeset SRC_GHPRJ="bootandy/dust"
+typeset SRC_NAME="${SRC_GHPRJ##*/}"
+
+typeset DST_PATH="$MYPATH/../bin"
+typeset DST_VERS=""
+
+# Query GH for latest version
+typeset SRC_VERS="$(ammHttp::GithubReleaseGetLastVersion "$SRC_GHPRJ")"
+[[ -z "$SRC_VERS" ]] && ammLog::Die "Unable to fetch source version from github"
+
+typeset SRC_ARCHIVE="${SRC_NAME}-${SRC_VERS}-x86_64-unknown-linux-gnu.tar.gz"
+typeset SRC_URL="https://github.com/${SRC_GHPRJ}/releases/download/${SRC_VERS}/${SRC_ARCHIVE}"
+
+# Download archive
+typeset DST_ARCHTMP="$(ammHttp::FetchSmart "$SRC_URL")"
+[[ -s "$DST_ARCHTMP" ]] || ammLog::Die "Unable to download archive '$SRC_URL' into temp '$DST_ARCHTMP'"
+
+# Extract binary
+tar -C "$DST_PATH" -xf "$DST_ARCHTMP" "${SRC_NAME}"
+
+# If we have bash-completion, also extract "autocomplete" folder

@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+set -o nounset
+set -o noclobber
+
+typeset MYSELF="$(readlink -f $0)"
+typeset MYPATH="${MYSELF%/*}"
+
+source "$MYPATH/../ammlib/ammlib"
+
+ammLib::Require http
+
+typeset SRC_GHPRJ="junegunn/fzf"
+typeset SRC_NAME="${SRC_GHPRJ##*/}"
+
+typeset DST_PATH="$MYPATH/../bin"
+typeset DST_VERS=""
+
+# Query GH for latest version
+typeset SRC_VERS="$(ammHttp::GithubReleaseGetLastVersion "$SRC_GHPRJ")"
+[[ -z "$SRC_VERS" ]] && SRC_VERS="0.20.0"
+[[ -z "$SRC_VERS" ]] && ammLog::Die "Unable to fetch source version from github"
+
+typeset SRC_ARCHIVE="${SRC_NAME}-${SRC_VERS}.tar.gz"
+typeset SRC_URL="https://github.com/${SRC_GHPRJ}-bin/releases/download/${SRC_VERS}/fzf-${SRC_VERS}-linux_amd64.tgz"
+
+# Download archive
+typeset DST_ARCHTMP="$(ammHttp::FetchSmart "$SRC_URL")"
+[[ -s "$DST_ARCHTMP" ]] || ammLog::Die "Unable to download archive '$SRC_URL' into temp '$DST_ARCHTMP'"
+
+# Extract binary
+tar -C "$DST_PATH" -xf "$DST_ARCHTMP" "${SRC_NAME}"
+
+# Shell scripts
+typeset SRC_RAW="https://raw.githubusercontent.com/junegunn/fzf/master/"
+ammHttp::FetchSmart "$SRC_RAW/shell/completion.bash" "$MYPATH/../lib/by_shell/bash.fzf-completion"
+ammHttp::FetchSmart "$SRC_RAW/shell/key-bindings.bash" "$MYPATH/../lib/by_shell/bash.fzf-keybindings"
+
+# Prepare system
