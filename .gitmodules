@@ -1,0 +1,3 @@
+[submodule "ammlib"]
+	path = ammlib
+	url = https://github.com/Saruspete/ammlib.git
