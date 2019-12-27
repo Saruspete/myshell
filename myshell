@@ -78,7 +78,11 @@ function mys_update {
 	fi
 
 	if [ -e "$MYSHELL_DIR/.git" ]; then
-		git -C "$MYSHELL_DIR" pull
+		(
+			cd "$MYSHELL_DIR"
+			git pull
+			git submodule update --remote --init --recursive
+		)
 	else
 		git clone "$MYSHELL_HUB" "$MYSHELL_DIR"
 	fi
