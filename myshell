@@ -12,7 +12,8 @@ if [ -z "$HOME" ] || ! [ -d "$HOME" ]; then
 fi
 
 # Reset PATH to a somewhat standard value
-export PATH="/bin:/sbin:/usr/bin:/usr/sbin:$PATH"
+typeset PATHORIG="$PATH"
+export PATH="/bin:/sbin:/usr/bin:/usr/sbin"
 
 # use strict (cannot work with third party modules badly written...)
 #set -u
@@ -282,6 +283,14 @@ if ! [[ -e "$MYSHELL_LCK" ]]; then
 	mys_setopt -u dotglob
 
 	date +'%y%m%d_%H%M%S' >| "$MYSHELL_LCK"
+fi
+
+# Add env to bin
+if [[ -n "$PATHORIG" ]]; then
+	typeset line
+	while read line; do
+		mys_path_binadd $line
+	done < <(echo "${PATHORIG//:/$'\n'}")
 fi
 
 # Add custom binaries to PATH
