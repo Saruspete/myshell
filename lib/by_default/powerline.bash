@@ -3,6 +3,14 @@
 #
 # Merge of https://github.com/b-ryan/powerline-shell/ and
 # https://github.com/skeswa/prompt .
+
+# Fonts:
+# Gentoo: Require media-fonts/powerline-symbols
+# Other:
+#   git clone https://github.com/powerline/fonts --depth=1
+#   cd fonts
+#   ./install.sh
+
 #
 # Configuration:
 #
@@ -203,7 +211,8 @@ function __powerline_get_foreground {
 # `<t|p>:<bg_color>:<fg_color>:<text>`. Chaque chaîne correspond à un segment.
 
 function __powerline_segment_time {
-	typeset text="$(date +%H:%M:%S)"
+	#typeset text="$(date +%H:%M:%S)"
+	typeset text="\t"
 	typeset bg=237 fg=250
 
 	__powerline_retval=("p:48;5;${bg}:38;5;${fg}:${text}")
