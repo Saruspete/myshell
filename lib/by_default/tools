@@ -103,6 +103,30 @@ function lddr {
 	done
 }
 
+
+###########################################################
+#
+# Fun
+#
+
+function mping {
+	ping $1|awk -F[=\ ] '
+		/me=/{
+			t=$(NF-1)
+			f=3000-14*log(t^20)
+			c="play -q -n synth 1 pl " f
+			print $0
+			system(c)
+		}'
+}
+
+function lolcat {
+	# https://gist.github.com/Saruspete/c3a44074da132f62a018ea2255c71abf
+	awk 'BEGIN {p=atan2(0,-1)/3} {n=split($0, c, ""); for(i=1; i<=n; i++) {t=0.1*(o+i/3); printf("\033[38;2;%d;%d;%dm%s%s", sin(t+0)*127 + 128,sin(t+2*p)*127+128,sin(t+4*p)*127+128, c[i], "\033[39m");}o+=3;printf("\n");}'
+}
+
+
+
 # Enable "thefuck" if available
 mys_isavail "thefuck" && {
 	#eval alias fuck='TF_CMD=$(TF_ALIAS=fuck PYTHONIOENCODING=utf-8 TF_SHELL_ALIASES=$(alias) thefuck $(fc -ln -1)) && eval $TF_CMD; history -s $TF_CMD'
