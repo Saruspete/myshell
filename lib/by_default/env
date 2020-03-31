@@ -70,3 +70,9 @@ function lastop {
 		echo "No last operation found in $fold/*$filter*"
 	fi
 }
+
+
+# Z (https://github.com/rupa/z)
+if [[ -s "$MYSHELL_BIN/z.sh" ]]; then
+	source "$MYSHELL_BIN/z.sh"
+fi
