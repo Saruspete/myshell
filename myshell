@@ -311,17 +311,27 @@ fi
 
 # Try to guess our running env (chroot, jail, VM...)
 MYS_RUNENV=""
-if [ -e /proc/1/mountinfo ]; then
-	if [ "$(awk '$5=="/"{print $4}' /proc/1/mountinfo)" != "/" ]; then
-		#if [[ -d "/sys/fs/cgroup/memory/lxc/$mys_hostname*" ]]; then
-		if grep "/lxc/$mys_hostname" /proc/1/cgroup >/dev/null 2>&1 || \
-		   grep "container=lxc" /proc/1/environ >/dev/null 2>&1; then
-			MYS_RUNENV="lxc"
-		elif grep "/docker/" /proc/1/cgroup >/dev/null 2>&1; then
-			MYS_RUNENV="docker"
-		else
-			MYS_RUNENV="chroot"
-		fi
+
+# Check if /proc is available
+if [ -e /proc/self/mountinfo ]; then
+
+	# If we have lxc in a cgroup, or if pid1 is spawned by lxc-start
+	if grep "/lxc/" /proc/self/cgroup >/dev/null 2>&1 || \
+	   grep "container=lxc" /proc/{self,1}/environ >/dev/null 2>&1; then
+		MYS_RUNENV="lxc"
+	# Same with docker
+	elif grep "/docker/" /proc/self/cgroup >/dev/null 2>&1; then
+		MYS_RUNENV="docker"
+	# If our / is not the real /, we're in a subdir of a shared FS in the parent host
+	elif [ "$(awk '$5=="/"{print $4}' /proc/self/mountinfo)" != "/" ]; then
+		MYS_RUNENV="chroot"
+	fi
+# No /proc/self/mountinfo entry just means /proc is not present.
+else
+	#  chroot
+	typeset rootinum="$(\stat -c %i /)"
+	if [ "$rootinum" -gt 1024 ]; then
+		MYS_RUNENV="chroot"
 	fi
 fi
 
