@@ -28,8 +28,9 @@ MYSHELL_LOC="$MYSHELL_DIR/local" # Local modifications
 MYSHELL_RUN="$MYSHELL_DIR/run"   # Cache
 MYSHELL_LCK="$MYSHELL_DIR/.initialized"
 
-# #####################################
+# -----------------------------------------------------------------------------
 # Helper subs
+# -----------------------------------------------------------------------------
 
 function mys_date {
 	date +'%Y-%m-%d_%H-%M-%S'
@@ -123,6 +124,10 @@ function mys_loadmod {
 	done
 }
 
+# -----------------------------------------------------------------------------
+# Cache management
+# -----------------------------------------------------------------------------
+
 # 
 function mys_cacherun {
 	typeset name="$1"; shift
@@ -187,8 +192,9 @@ function mys_cacheclear {
 	:
 }
 
-# #####################################
-# Environement management
+# -----------------------------------------------------------------------------
+# Environement
+# -----------------------------------------------------------------------------
 
 function mys_path_binadd {
 	mys_path_add "PATH" $@
@@ -241,6 +247,10 @@ function mys_setopt {
 	fi
 }
 
+# -----------------------------------------------------------------------------
+# Prompt
+# -----------------------------------------------------------------------------
+
 # Only show at startup
 if [[ -z "$MYS_LOADTIME" ]] && [[ -n "$PROMPT_COMMAND" ]]; then
 	echo >&2 "Warning: \$PROMPT_COMMAND is already set: '$PROMPT_COMMAND'"
@@ -270,8 +280,9 @@ function mys_promptfunc_register {
 }
 
 
-# #####################################
+# -----------------------------------------------------------------------------
 # Main processing
+# -----------------------------------------------------------------------------
 
 # Load external configuration files
 if ! [[ -e "$MYSHELL_LCK" ]]; then
@@ -360,4 +371,5 @@ mys_loadmod "user" "$(id -nu)"
 mys_loadmod "user" "$(id -nu).priv"
 
 
+# At the end, replace the PROMPT_COMMAND by our 
 PROMPT_COMMAND='mys_promptfunc $?'
