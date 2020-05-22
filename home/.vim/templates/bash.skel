@@ -1,13 +1,23 @@
 #!/usr/bin/env bash
 
-set -o nounset
-set -o noclobber
+typeset MYSELF="$(readlink -e $0 || realpath $0)"
+typeset MYPATH="${MYSELF%/*}"
 
-export LC_ALL=C
-export PATH="/bin:/sbin:/usr/bin:/usr/sbin:$PATH"
-export PS4=' (${BASH_SOURCE##*/}::${FUNCNAME[0]:-main}::$LINENO)  '
+#set -o nounset -o noclobber
+#export LC_ALL=C
+#export PATH="/bin:/sbin:/usr/bin:/usr/sbin:$PATH"
+#export PS4=' (${BASH_SOURCE##*/}::${FUNCNAME[0]:-main}::$LINENO)  '
 
-readonly MYSELF="$(readlink -f $0)"
-readonly MYPATH="${MYSELF%/*}"
+# Load main library
+typeset -a ammpaths=("$MYPATH/ammlib" "$HOME/.ammlib" "/etc/ammlib")
+for ammpath in "${ammpaths[@]}" fail; do
+	[[ -e "$ammpath/ammlib" ]] && source "$ammpath/ammlib" && break
+done
+if [[ "$ammpath" == "fail" ]]; then
+	echo >&2 "Unable to find ammlib in paths '${ammpaths[@]}'"
+	echo >&2 "Download it with 'git clone https://github.com/Saruspete/ammlib.git $MYPATH'"
+	exit 1
+fi
 
-
+# Load the required libraries
+#ammLib::Require "optparse"
