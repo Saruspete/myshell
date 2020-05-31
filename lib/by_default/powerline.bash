@@ -268,7 +268,8 @@ function __powerline_segment_hostname {
 }
 
 function __powerline_segment_time {
-	__powerline_retval=('\t')
+	typeset bg=237 fg=250
+	__powerline_retval=("p:48;5;${bg}:38;5;${fg}:${POWERLINE_CLOCK_ICON-}:\\t")
 }
 
 function __powerline_segment_docker {
@@ -717,6 +718,7 @@ function __powerline_autoicons {
 			: ${POWERLINE_GIT_DETACHED_ICON:=$(echo -ne '\uF0C1 ')}
 			: ${POWERLINE_GIT_ICON:=$(echo -ne '\uEDCE ')}
 			: ${POWERLINE_HOSTNAME_ICON:=$(echo -ne '\uE4BA ')}
+			#: ${POWERLINE_CLOCK_ICON:=$(echo -ne '\uF017 ')}
 			: ${POWERLINE_OPENSTACK_ICON:=$(echo -ne '\uE574 ')}
 			: ${POWERLINE_PWD_ICON:=$(echo -ne '\uE015 ')}
 			: ${POWERLINE_HOME_ICON:=$(echo -ne '\uE67D ')}
@@ -732,6 +734,7 @@ function __powerline_autoicons {
 			: ${POWERLINE_GIT_DETACHED_ICON:=$(echo -ne '\uF06A ')}  # nf-fa-exclamation_circle
 			: ${POWERLINE_GIT_ICON:=$(echo -ne '\uE725 ')}           # nf-dev-git_branch
 			: ${POWERLINE_HOSTNAME_ICON:=$(echo -ne '\uF015 ')}      # nf-fa-home
+			: ${POWERLINE_CLOCK_ICON:=$(echo -ne '\uF017 ')}         # nf-fa-clock_o
 			: ${POWERLINE_OPENSTACK_ICON:=$(echo -ne '\uFCB4 ')}     # nf-mdi-cloud_tags
 			: ${POWERLINE_PWD_ICON:=$(echo -ne '\uF07B ')}           # nf-fa-folder
 			: ${POWERLINE_PWD_ICON:=$(echo -ne '\uF7DB ')}           # nf-mdi-home
