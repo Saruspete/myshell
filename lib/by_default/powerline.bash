@@ -272,6 +272,15 @@ function __powerline_segment_time {
 	__powerline_retval=("p:48;5;${bg}:38;5;${fg}:${POWERLINE_CLOCK_ICON-}:\\t")
 }
 
+function __powerline_segment_scheduler {
+	__powerline_retval=()
+	# Slurm
+	if [[ -n "$SLURM_JOB_ID" ]]; then
+		__powerline_retval=("p:48;5;33:38;5;0::JobID $SLURM_JOB_ID $SLURM_JOB_CPUS_PER_NODE")
+	fi
+}
+
+
 function __powerline_segment_docker {
 	typeset bg
 	typeset dir
