@@ -239,9 +239,7 @@ function __powerline_init_hostname {
 	typeset text
 	typeset hash
 
-	if [ -z "${HOSTNAME-}" ] && [ -f /etc/hostname ] ; then
-		read -r HOSTNAME < /etc/hostname
-	fi
+	HOSTNAME="$(uname -n)"
 	USER="${USER-${USERNAME-${LOGNAME-}}}"
 	# N'appeler whoami qui si besoin
 	if [ -z "${USER}" ] ; then
@@ -662,7 +660,7 @@ function __powerline_autosegments {
 		__powerline_retval+=(maildir)
 	fi
 
-	__powerline_retval+=(pwd)
+	__powerline_retval+=(pwd scheduler)
 
 	if type -p python >/dev/null ; then
 		__powerline_retval+=(python)
