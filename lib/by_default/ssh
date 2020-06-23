@@ -47,19 +47,19 @@ ssh_agent_start () {
 	\rm "$lockfile"
 }
 
+# If env is available, try to load it
+if [ -f "$SSH_ENV" ]; then
+	. "$SSH_ENV" > /dev/null
 
-# Auto start the agent if we're not already from ssh
-if [[ -z "${SSH_CONNECTION}" ]]; then
-	if [ -f "$SSH_ENV" ]; then
-		. "$SSH_ENV" > /dev/null
-
-		# If the file exists, check its still valid
-		[ -e "/proc/$SSH_AGENT_PID" ] && \
-		[ "$(cat "/proc/$SSH_AGENT_PID/loginuid")" == "$(id -u)" ] || {
-			echo "Stale ssh environment file. Restarting"
-			ssh_agent_start
-		}
-	else
+	# If the file exists, check its still valid
+	[ -e "/proc/$SSH_AGENT_PID" ] && \
+	[ "$(cat "/proc/$SSH_AGENT_PID/loginuid")" == "$(id -u)" ] || {
+		echo "Stale ssh environment file. Restarting"
+		ssh_agent_start
+	}
+else
+	# Auto start the agent if we're not already from ssh
+	if [[ -z "${SSH_CONNECTION}" ]]; then
 		ssh_agent_start
 	fi
 fi
