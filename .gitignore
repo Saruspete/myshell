@@ -6,3 +6,4 @@ local
 *.priv
 run
 home/.vim/.netrwhist
+bin
