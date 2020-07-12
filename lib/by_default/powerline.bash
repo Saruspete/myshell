@@ -700,7 +700,7 @@ function __powerline_autoicons {
 		esac
 	fi
 
-	typeset LC_CTYPE=en_US.utf8
+	typeset LC_CTYPE=C.utf8
 	case "${mode}" in
 		compat)
 			: ${POWERLINE_SEP:=$(echo -ne '\u25B6')}
