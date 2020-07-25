@@ -11,6 +11,11 @@ function charrepeat {
 	seq -s "$char" $time|tr -d '[:digit:]'
 }
 
+function regex {
+	typeset rgx="$1"
+	typeset idx="${2:-0}"
+	awk 'match($0,/'$rgx'/, ary) { print ary['$idx']; }'
+}
 
 ###########################################################
 #
