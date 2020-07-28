@@ -27,6 +27,8 @@ __default_thinsep=''
 # hack avoid calling functions un subprocess to get ret from stdout.
 __powerline_retval=""
 
+__powerline_utf8=""
+
 function __powerline_split {
 	typeset sep="$1"
 	typeset str="$2"
@@ -484,7 +486,7 @@ function __powerline_segment_git {
 		return
 	fi
 
-	if ! status="$(LC_ALL=C.UTF-8 "${__powerline_git_cmd[@]}" 2>/dev/null)" ; then
+	if ! status="$(LC_ALL=$__powerline_utf8 "${__powerline_git_cmd[@]}" 2>/dev/null)" ; then
 		__powerline_retval=()
 		return
 	fi
@@ -700,7 +702,7 @@ function __powerline_autoicons {
 		esac
 	fi
 
-	typeset LC_CTYPE=C.utf8
+	typeset LC_CTYPE=$__powerline_utf8
 	case "${mode}" in
 		compat)
 			: ${POWERLINE_SEP:=$(echo -ne '\u25B6')}
@@ -765,6 +767,20 @@ function __powerline_init_segments {
 		fi
 	done
 }
+
+function __powerline_init_utf8 {
+	typeset locales="$(locale -a|grep -ie utf8 -e utf-8)" localepref="C en_US en_GB"
+	typeset locavail locpref
+	for locpref in $localepref; do
+		for locavail in $locales; do
+			typeset loctest="${locavail%.*}"
+			[[ "$loctest" == "$locpref" ]] && __powerline_utf8="$locavail" && break 2
+		done
+	done
+}
+
+# Init utf8
+__powerline_init_utf8
 
 # Initialiser les segments à partir de l'environnement.
 __powerline_autoicons
