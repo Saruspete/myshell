@@ -252,9 +252,9 @@ function mys_setopt {
 # -----------------------------------------------------------------------------
 
 # Only show at startup
-if [[ -z "$MYS_LOADTIME" ]] && [[ -n "$PROMPT_COMMAND" ]]; then
-	echo >&2 "Warning: \$PROMPT_COMMAND is already set: '$PROMPT_COMMAND'"
-fi
+#if [[ -z "$MYS_LOADTIME" ]] && [[ -n "$PROMPT_COMMAND" ]]; then
+#	echo >&2 "Warning: \$PROMPT_COMMAND is already set: '$PROMPT_COMMAND'"
+#fi
 
 # That should be a typeset -i but POSIX...
 typeset    MYS_LOADTIME="$(date +%s)"
@@ -266,6 +266,7 @@ function mys_promptfunc {
 	if [[ -s "$MYSHELL_DIR/.reload" ]]; then
 		typeset time="$(cat $MYSHELL_DIR/.reload | tr -cd '[0-9]')"
 		[[ "${time:-0}" -gt "$MYS_LOADTIME" ]] && mys_reload
+		MYS_LOADTIME="$(date +%s)"
 	fi
 
 	typeset cb
