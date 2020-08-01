@@ -702,7 +702,9 @@ function __powerline_autoicons {
 		esac
 	fi
 
-	typeset LC_CTYPE=$__powerline_utf8
+	# LC_CTYPE seems to fail with C.UTF8
+	#typeset LC_CTYPE=$__powerline_utf8
+	typeset LC_ALL=$__powerline_utf8
 	case "${mode}" in
 		compat)
 			: ${POWERLINE_SEP:=$(echo -ne '\u25B6')}
@@ -769,7 +771,7 @@ function __powerline_init_segments {
 }
 
 function __powerline_init_utf8 {
-	typeset locales="$(locale -a|grep -ie utf8 -e utf-8)" localepref="C en_US en_GB"
+	typeset locales="$(locale -a 2>/dev/null|grep -ie utf8 -e utf-8)" localepref="C en_US en_GB"
 	typeset locavail locpref
 	for locpref in $localepref; do
 		for locavail in $locales; do
