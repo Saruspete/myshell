@@ -15,6 +15,9 @@ fi
 typeset PATHORIG="$PATH"
 export PATH="/bin:/sbin:/usr/bin:/usr/sbin"
 
+# Set a safer umask (no group write)
+umask 0022
+
 # use strict (cannot work with third party modules badly written...)
 #set -u
 
@@ -40,6 +43,7 @@ function mys_merge {
 	typeset dir="$1"
 	typeset src="$2"
 	typeset name="${src##*/}"
+
 	typeset dst="$dir/$name"
 
 	if [ -L "$dst" ]; then
@@ -51,7 +55,7 @@ function mys_merge {
 	if [ -e "$dst" ]; then
 		# Prepare the merge
 		typeset loc="$MYSHELL_LOC/$name"
-		cp -a "$dst" "$loc"
+		cp --archive "$dst" "$loc"
 
 		# Backup local and clear destination
 		mv "$dst" "${dst}.mys.$(mys_date)"
@@ -60,6 +64,10 @@ function mys_merge {
 		if [ -f "$loc" ]; then
 			cat "$src" >> "$loc"
 			src="$loc"
+		# Copy missing content if folder
+		elif [ -d "$loc" ]; then
+			# TODO: Maybe rather call mys_merge recursively
+			cp --recursive --update "$src/./" "$loc/"
 		fi
 	fi
 
