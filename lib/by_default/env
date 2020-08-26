@@ -15,6 +15,7 @@ mys_path_manadd "/usr/symcli/man" "/opt/VRTS/man" "/opt/VRTSvcs/man"
 mys_isavail "vim" && export EDITOR="vim"
 
 # Aliases cause I'm lazy
+alias ls="ls --color=tty"
 alias l="ls -al"
 alias s="screen -r"
 alias g="grep"
@@ -30,6 +31,7 @@ alias ..="cd .."
 alias ...="cd ../.."
 alias ....="cd ../../.."
 alias .....="cd ../../../.."
+alias ......="cd ../../../../.."
 
 
 #
