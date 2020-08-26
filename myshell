@@ -359,12 +359,6 @@ fi
 # Load per-shell definitions
 mys_shellname="${0##*/}"
 mys_shellname="${mys_shellname#-}"
-mys_custom="$MYSHELL_DIR/myshell.${mys_shellname}"
-if [ -e "$mys_custom" ]; then
-	. "$mys_custom"
-else
-	echo "MyShell: No custom file found for shell '$0'"
-fi
 
 # Load custom modules
 mys_loadmod "default" "*"
