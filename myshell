@@ -127,7 +127,7 @@ function mys_loadmod {
 
 	[ -z "$val" ] && return
 	for file in $MYSHELL_LIB/by_$mod/$val; do
-		[[ -f "$file" ]] && [[ -s "$file" ]] || continue
+		[ -f "$file" ] && [ -s "$file" ] || continue
 		. "$file"
 	done
 }
@@ -271,15 +271,15 @@ function mys_promptfunc {
 	typeset retcode=${1:-$?}
 
 	# Reload configuration if witness flag is present
-	if [[ -s "$MYSHELL_DIR/.reload" ]]; then
+	if [ -s "$MYSHELL_DIR/.reload" ]; then
 		typeset time="$(cat $MYSHELL_DIR/.reload | tr -cd '[0-9]')"
-		[[ "${time:-0}" -gt "$MYS_LOADTIME" ]] && mys_reload
+		[ "${time:-0}" -gt "$MYS_LOADTIME" ] && mys_reload
 		MYS_LOADTIME="$(date +%s)"
 	fi
 
 	typeset cb
 	for cb in ${MYS_PROMPTFUNCCB[@]}; do
-		[[ -n "$cb" ]] || continue
+		[ -n "$cb" ] || continue
 		$cb $retcode
 	done
 }
@@ -294,12 +294,12 @@ function mys_promptfunc_register {
 # -----------------------------------------------------------------------------
 
 # Load external configuration files
-if ! [[ -e "$MYSHELL_LCK" ]]; then
+if ! [ -e "$MYSHELL_LCK" ]; then
 	echo "MyShell: Initializing local configuration files"
 	typeset src=""
 	mys_setopt -s dotglob
 	for src in $MYSHELL_EXT/*; do
-		[[ -e "$src" ]] || continue
+		[ -e "$src" ] || continue
 
 		echo "MyShell: Merging $src in $HOME"
 		mys_merge "$HOME" "$src"
@@ -310,7 +310,7 @@ if ! [[ -e "$MYSHELL_LCK" ]]; then
 fi
 
 # Add env to bin
-if [[ -n "$PATHORIG" ]]; then
+if [ -n "$PATHORIG" ]; then
 	typeset line
 	while read line; do
 		mys_path_binadd $line
