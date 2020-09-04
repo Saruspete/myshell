@@ -29,6 +29,10 @@
 [pull]
 	rebase = true
 
+[http]
+	# Increase POST buffer to 512M for large send
+	postBuffer = 524288000
+
 [alias]
 	# Lazyness
 	co      = checkout
