@@ -52,14 +52,15 @@ if [ -f "$SSH_ENV" ]; then
 	. "$SSH_ENV" > /dev/null
 
 	# If the file exists, check its still valid
-	[ -e "/proc/$SSH_AGENT_PID" ] && \
-	[ "$(cat "/proc/$SSH_AGENT_PID/loginuid")" == "$(id -u)" ] || {
+	if [ "$(awk '/^Uid:/{print $2}' "/proc/$SSH_AGENT_PID/status" 2>/dev/null)" != "$(id -u)" ] ||
+	[ "$(cat "/proc/$SSH_AGENT_PID/comm" 2>/dev/null)" != "ssh-agent" ]; then
 		echo "Stale ssh environment file. Restarting"
 		ssh_agent_start
-	}
+	fi
 else
 	# Auto start the agent if we're not already from ssh
 	if [[ -z "${SSH_CONNECTION}" ]]; then
 		ssh_agent_start
 	fi
 fi
+
