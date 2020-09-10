@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+set -o nounset
+set -o noclobber
+
+typeset MYSELF="$(readlink -f $0)"
+typeset MYPATH="${MYSELF%/*}"
+
+source "$MYPATH/../ammlib/ammlib"
+
+ammLib::Require http
+
+typeset SRC_GHPRJ="stedolan/jq"
+
+typeset DST_PATH="$MYPATH/../bin"
+typeset DST_VERS=""
+
+# Query GH for latest version
+typeset SRC_VERS="$(ammHttp::GithubReleaseGetLastVersion "$SRC_GHPRJ")"
+[[ -z "$SRC_VERS" ]] && ammLog::Die "Unable to fetch source version from github"
+
+
+typeset SRC_ARCHIVE="jq-linux64"
+typeset SRC_URL="https://github.com/${SRC_GHPRJ}/releases/download/${SRC_VERS}/${SRC_ARCHIVE}"
+
+# Download archive
+typeset DST_FILETMP="$(ammHttp::FetchSmart "$SRC_URL")"
+[[ -s "$DST_FILETMP" ]] || ammLog::Die "Unable to download '$SRC_URL' into temp '$DST_FILETMP'"
+chmod +x "$DST_FILETMP"
+
+mv "$DST_FILETMP" "$DST_PATH/jq" || ammLog::Die "Unable to move '$DST_FILETMP' as '$DST_PATH/jq'"
+
