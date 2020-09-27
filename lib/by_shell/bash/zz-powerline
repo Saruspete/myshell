@@ -654,6 +654,7 @@ function __powerline_autosegments {
 
 	typeset remote;
 	remote=${SSH_CLIENT-${SUDO_USER-${container-}}}
+	[[ -z "$remote" ]] && [[ "$(stat -c %U $(tty))" != "$USER" ]] && remote="su"
 	if [ -n "${remote}" ] ; then
 		__powerline_retval+=(hostname)
 	fi
