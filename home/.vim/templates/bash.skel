@@ -6,7 +6,7 @@ typeset MYPATH="${MYSELF%/*}"
 #set -o nounset -o noclobber
 #export LC_ALL=C
 #export PATH="/bin:/sbin:/usr/bin:/usr/sbin:$PATH"
-#export PS4=' (${BASH_SOURCE##*/}::${FUNCNAME[0]:-main}::$LINENO)  '
+#export PS4=' (${BASH_SOURCE##*/}:$LINENO ${FUNCNAME[0]:-main})  '
 
 # Load main library
 typeset -a ammpaths=("$MYPATH/ammlib" "$HOME/.ammlib" "/etc/ammlib")
