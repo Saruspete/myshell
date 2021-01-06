@@ -1,6 +1,6 @@
 # vim: ft=sh
 
-PS4=' (${BASH_SOURCE##*/}::${FUNCNAME[0]:-main}::$LINENO)  '
+PS4=' (${BASH_SOURCE##*/}:$LINENO ${FUNCNAME[0]:-main})  '
 
 # Source system-bashrc
 #[[ -e /etc/bashrc ]] && source /etc/bashrc
