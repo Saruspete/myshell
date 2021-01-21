@@ -42,9 +42,11 @@ function mys_date {
 function mys_merge {
 	typeset dir="$1"
 	typeset src="$2"
-	typeset name="${src##*/}"
+	typeset pol="${3:-replace}"
 
+	typeset name="${src##*/}"
 	typeset dst="$dir/$name"
+
 
 	if [ -L "$dst" ]; then
 		echo "MyShell: cannot merge '$src' with '$dst': Target is a symlink"
@@ -126,6 +128,7 @@ function mys_loadmod {
 	typeset val="$2"
 
 	[ -z "$val" ] && return
+	typeset file
 	for file in $MYSHELL_LIB/by_$mod/$val; do
 		[ -f "$file" ] && [ -s "$file" ] || continue
 		. "$file"
@@ -300,9 +303,17 @@ if ! [ -e "$MYSHELL_LCK" ]; then
 	mys_setopt -s dotglob
 	for src in $MYSHELL_EXT/*; do
 		[ -e "$src" ] || continue
+		# Skip files *.myspol (myshell policy)
+		[ "${src%.myspol}" != "$src" ] && continue
+
+		# Check for merging policy
+		typeset pol="replace"
+		if [ -s "${src}.myspol" ]; then
+			:
+		fi
 
 		echo "MyShell: Merging $src in $HOME"
-		mys_merge "$HOME" "$src"
+		mys_merge "$HOME" "$src" "$pol"
 	done
 	mys_setopt -u dotglob
 
