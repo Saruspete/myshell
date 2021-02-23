@@ -216,7 +216,7 @@ function mys_path_manadd {
 }
 
 function mys_path_libadd {
-	mys_path_add "LB_LIBRARY_PATH" $@
+	mys_path_add "LD_LIBRARY_PATH" $@
 }
 
 
