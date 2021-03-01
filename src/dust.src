@@ -28,6 +28,6 @@ typeset DST_ARCHTMP="$(ammHttp::FetchSmart "$SRC_URL")"
 [[ -s "$DST_ARCHTMP" ]] || ammLog::Die "Unable to download archive '$SRC_URL' into temp '$DST_ARCHTMP'"
 
 # Extract binary
-tar -C "$DST_PATH" -xf "$DST_ARCHTMP" "${SRC_NAME}"
+tar -C "$DST_PATH" -xf "$DST_ARCHTMP" "${SRC_ARCHIVE%.tar.gz}/dust" --strip-components=1
 
 # If we have bash-completion, also extract "autocomplete" folder
