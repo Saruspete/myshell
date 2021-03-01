@@ -7,6 +7,12 @@ shell /bin/bash
 # GLOBAL SETTINGS
 # ------------------------------------------------------------------------------
 
+# Set charset
+defutf8 on
+
+# Affects copying text regions
+crlf off
+
 startup_message off
 
 #defflow on # will force screen to process ^S/^Q
