@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+set -o nounset
+set -o noclobber
+
+typeset MYSELF="$(readlink -f $0)"
+typeset MYPATH="${MYSELF%/*}"
+
+source "$MYPATH/../ammlib/ammlib"
+
+ammLib::Require http
+
+typeset GIT_REPO="https://git.zx2c4.com/password-store"
+typeset GIT_TAGS="$(ammHttp::CGitTagGet "$GIT_REPO")"
+
+typeset DST_PATH="$MYPATH/../bin/pass"
+typeset DST_VERS="$(echo "$GIT_TAGS"|head -n 1)"
+
+typeset SRC_URL="https://git.zx2c4.com/password-store/snapshot/password-store-${DST_VERS}.tar.xz"
+
+# Download archive
+typeset DST_ARCHTMP="$(ammHttp::FetchSmart "$SRC_URL")"
+[[ -s "$DST_ARCHTMP" ]] || ammLog::Die "Unable to download archive '$SRC_URL' into temp '$DST_ARCHTMP'"
+
+tar -xf "$DST_ARCHTMP" --strip-component 2 "password-store-${DST_VERS}/src/password-store.sh"
+
+if ! [[ -s "password-store.sh" ]]; then
+	ammLog::Die "Unable to extract password-store.sh"
+else
+	mv password-store.sh "$DST_PATH"
+fi
