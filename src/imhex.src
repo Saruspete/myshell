@@ -6,7 +6,7 @@ set -o noclobber
 typeset MYSELF="$(readlink -f $0)"
 typeset MYPATH="${MYSELF%/*}"
 
-source "$MYPATH/../ammlib/ammlib"
+source "$MYPATH/_common"
 
 ammLib::Require http
 
