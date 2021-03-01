@@ -114,6 +114,7 @@ function lddr {
 #
 
 function whileread {
+	typeset line
 	while read line; do
 		"$@" $line
 	done
