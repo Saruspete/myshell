@@ -273,6 +273,9 @@ typeset -a MYS_PROMPTFUNCCB=()
 function mys_promptfunc {
 	typeset retcode=${1:-$?}
 
+	# Call our post-exec hooks
+	mys_postexec "$retcode"
+
 	# Reload configuration if witness flag is present
 	if [ -s "$MYSHELL_DIR/.reload" ]; then
 		typeset time="$(cat $MYSHELL_DIR/.reload | tr -cd '[0-9]')"
@@ -285,12 +288,41 @@ function mys_promptfunc {
 		[ -n "$cb" ] || continue
 		$cb $retcode
 	done
+
 }
 
 function mys_promptfunc_register {
 	MYS_PROMPTFUNCCB+=("$*")
 }
 
+
+typeset -a MYS_PREEXECCB=() MYS_POSTEXECCB=()
+typeset -i MYS_PREEXECTIME=0
+typeset    MYS_PREEXECCMD=
+function mys_preexec {
+	# Skip our own PROMPT_COMMAND to reset our stats
+	[ "${BASH_COMMAND%% *}" == "mys_promptfunc" ] && return
+
+	typeset cb
+	for cb in ${MYS_PREEXECCB[@]}; do
+		[ -n "$cb" ] || continue
+		$cb
+	done
+	MYS_PREEXECTIME="${SECONDS:-$(date +%s)}"
+	MYS_PREEXECCMD="$BASH_COMMAND"
+	#echo "Preeec: $MYS_PREEXECCMD at $MYS_PREEXECTIME"
+}
+function mys_postexec {
+	typeset retcode="$1"
+
+	#echo "Postexec: took $((${SECONDS:-$(date +%s)} - $MYS_PREEXECTIME ))s for $MYS_PREEXECCMD"
+
+	typeset cb
+	for cb in ${MYS_PREEXECCB[@]}; do
+		[ -n "$cb" ] || continue
+		$cb "$retcode"
+	done
+}
 
 # -----------------------------------------------------------------------------
 # Main processing
@@ -387,3 +419,4 @@ mys_loadmod "user" "$(id -nu).priv"
 
 # At the end, replace the PROMPT_COMMAND by our 
 PROMPT_COMMAND='mys_promptfunc $?'
+trap 'mys_preexec' DEBUG
