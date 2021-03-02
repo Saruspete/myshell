@@ -459,6 +459,15 @@ function __powerline_segment_python {
 	fi
 }
 
+function __powerline_segment_cmdtime {
+	# Using myshell pre-exec time
+	if [[ -n "${MYS_PREEXECTIME:-}" ]]; then
+		typeset -i time_sec="$((${SECONDS:-$(date +%s)} - $MYS_PREEXECTIME))"
+		__powerline_retval=("p:48;5;25:38;5;220:${POWERLINE_CLOCKRUN_ICON-}:${time_sec}s")
+		return
+	fi
+}
+
 function __powerline_segment_status {
 	typeset ec=$1
 
@@ -633,7 +642,7 @@ function __update_ps1 {
 	typeset __powerline_segments=()
 	typeset segname
 
-	for segname in ${POWERLINE_SEGMENTS-hostname pwd status} ; do
+	for segname in ${POWERLINE_SEGMENTS-hostname pwd cmdtime status} ; do
 		"__powerline_segment_${segname}" $last_exit_code
 		__powerline_segments+=("${__powerline_retval[@]}")
 	done
@@ -685,7 +694,7 @@ function __powerline_autosegments {
 		__powerline_retval+=(k8s)
 	fi
 
-	__powerline_retval+=(status)
+	__powerline_retval+=(cmdtime status)
 }
 
 function __powerline_autoicons {
@@ -731,6 +740,7 @@ function __powerline_autoicons {
 			: ${POWERLINE_GIT_ICON:=$(echo -ne '\uEDCE ')}
 			: ${POWERLINE_HOSTNAME_ICON:=$(echo -ne '\uE4BA ')}
 			#: ${POWERLINE_CLOCK_ICON:=$(echo -ne '\uF017 ')}
+			: ${POWERLINE_CLOCKRUN_ICON:=$(echo -ne '\uF551 ')}
 			: ${POWERLINE_OPENSTACK_ICON:=$(echo -ne '\uE574 ')}
 			: ${POWERLINE_PWD_ICON:=$(echo -ne '\uE015 ')}
 			: ${POWERLINE_HOME_ICON:=$(echo -ne '\uE67D ')}
@@ -747,6 +757,7 @@ function __powerline_autoicons {
 			: ${POWERLINE_GIT_ICON:=$(echo -ne '\uE725 ')}           # nf-dev-git_branch
 			: ${POWERLINE_HOSTNAME_ICON:=$(echo -ne '\uF015 ')}      # nf-fa-home
 			: ${POWERLINE_CLOCK_ICON:=$(echo -ne '\uF017 ')}         # nf-fa-clock_o
+			: ${POWERLINE_CLOCKRUN_ICON:=$(echo -ne '\uF651 ')}      # nf-mdi-clock_fast
 			: ${POWERLINE_OPENSTACK_ICON:=$(echo -ne '\uFCB4 ')}     # nf-mdi-cloud_tags
 			: ${POWERLINE_PWD_ICON:=$(echo -ne '\uF07B ')}           # nf-fa-folder
 			: ${POWERLINE_PWD_ICON:=$(echo -ne '\uF7DB ')}           # nf-mdi-home
