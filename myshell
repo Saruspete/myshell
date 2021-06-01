@@ -309,7 +309,7 @@ function mys_preexec {
 		$cb
 	done
 	MYS_PREEXECTIME="${SECONDS:-$(date +%s)}"
-	MYS_PREEXECCMD="$BASH_COMMAND"
+	MYS_PREEXECCMD+="${MYS_PREEXECCMD:+ | }$BASH_COMMAND"
 	#echo "Preeec: $MYS_PREEXECCMD at $MYS_PREEXECTIME"
 }
 function mys_postexec {
@@ -322,6 +322,8 @@ function mys_postexec {
 		[ -n "$cb" ] || continue
 		$cb "$retcode"
 	done
+
+	MYS_PREEXECCMD=""
 }
 
 # -----------------------------------------------------------------------------
