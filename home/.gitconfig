@@ -59,7 +59,7 @@
 
 
 [includeIf "gitdir:~/devel/mvc-private/"]
-	path = ~/.git/config-mvc
+	path = ~/.gitconfig.d/config-mvc
 
 
 # Inspiration / Source:
