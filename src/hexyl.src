@@ -17,7 +17,7 @@ typeset DST_PATH="$MYPATH/../bin"
 typeset DST_VERS=""
 
 # Query GH for latest version
-typeset SRC_VERS="$(ammHttp::GithubReleaseGetLastVersion "$SRC_GHPRJ")"
+typeset SRC_VERS="$(ammHttp::GithubReleaseGetLatest "$SRC_GHPRJ")"
 [[ -z "$SRC_VERS" ]] && ammLog::Die "Unable to fetch source version from github"
 
 typeset SRC_ARCHIVE="${SRC_NAME}-${SRC_VERS}-x86_64-unknown-linux-musl.tar.gz"
