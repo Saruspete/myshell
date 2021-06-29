@@ -33,6 +33,53 @@ alias ....="cd ../../.."
 alias .....="cd ../../../.."
 alias ......="cd ../../../../.."
 
+alias ytdl="youtube-dl -f '[height<=720]'"
+
+
+# Override RM to protect critical folders. Regex
+typeset -gxa MYS_RM_PROTECT=(
+	# All files and folders in homedir root (to avoid 'rm -rf *')
+	"rgx:$HOME/[^/]+"
+	"$HOME/.ssh/*"
+)
+function rmsafe {
+	typeset todel= safedir= confirmdir=""
+	typeset -A safe2abs=
+
+	# Also parse once the protected paths to resolve absolute path
+	for safedir in "${MYS_RM_PROTECT[@]}"; do
+		safe2abs[$safedir]="$(readlink -f $safedir || realpath $safedir)"
+	done
+	# Scan for protected paths
+	for todel in "$@"; do
+		typeset todelabs="$(readlink -f "$todel" 2>/dev/null || realpath "$todel")"
+		for safedir in "${MYS_RM_PROTECT[@]}"; do
+			#case safedir in
+				# Regex
+			#	rgx:*)
+			#typeset safeabs="$(readlink -f "$
+			# Check with relative or  absolute path
+			if [[ "$todel" =~ ^$safedir ]] || [[ "$todelabs" =~ ^$safedir$ ]]; then
+				confirmdir+="  - '$todel'   folder '$todelabs'   safedir '$safedir'\n"
+			fi
+		done
+	done
+
+	# Check if we have protected paths
+	if [[ -n "$confirmdir" ]]; then
+		echo >&2 "!!!!!!!!!!!!!!!!!!!!!!!!!!!     WARNING     !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+		echo >&2 "You are about to remove content in a protected dir. Matched entries:"
+		echo >&2 -e "$confirmdir"
+		typeset answer=""
+		while [[ "$answer" != "YES" ]]; do
+			echo >&2 "!! Are you sure ? Enter 'yes' in UPPERCASE to confinue, Ctrl+C to cancel !!"
+			read answer
+		done
+	fi
+
+	# Call real rm binary
+	echo $(type -P rm) "$@"
+}
 
 #
 alias flake8="flake8 --ignore=E501"
