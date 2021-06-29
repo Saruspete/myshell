@@ -64,3 +64,9 @@
 
 # Inspiration / Source:
 #  https://github.com/brauliobo/gitconfig/blob/master/configs/.gitconfig
+[core]
+	# Don't escape UTF8 chars to their hex value
+	quotepath = false
+[gc]
+	# Create cache commit-graph to speedup large projects
+	writeCommitGraph = true
