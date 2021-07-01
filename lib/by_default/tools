@@ -80,14 +80,14 @@ function testport {
 #
 
 function _ldd {
-	ldd $1 | awk 'NF>3 && $1 != "libc.so.6"{print $3}'
+	ldd "$1" | awk 'NF>3 && $1 != "libc.so.6"{print $3}'
 }
 
 function lddr {
 	[[ $# -eq 0 ]] && return
 
 	typeset -i level="0"
-	[[ ! -e "$1" ]] && [[ -z "$(\type -P $1)" ]] && {
+	[[ ! -e "$1" ]] && [[ -z "$(\type -P "$1")" ]] && {
 		level="$1"
 		shift
 	}
@@ -95,13 +95,15 @@ function lddr {
 	level="$(($level + 1))"
 
 	for file in "$@"; do
-		typeset realbin="$(type -P $file)"
+		# Try to get the real binary
+		typeset realbin="$(realpath "$file")"
+
 		# First level is invocking one
 		[[ "$level" == "1" ]] && {
 			printf "== %s (%s)\n" "$file" "$realbin"
 		}
 
-		for lib in $(_ldd $realbin); do
+		for lib in $(_ldd "$realbin"); do
 			printf "%s  %s\n" "$pad" "$lib"
 			lddr "$level" "$lib"
 		done
