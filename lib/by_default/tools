@@ -83,31 +83,68 @@ function _ldd {
 	ldd "$1" | awk 'NF>3 && $1 != "libc.so.6"{print $3}'
 }
 
+typeset    __LDDR_DEPS_UNIQ=
+typeset -A __LDDR_DEPS_FOUND=()
 function lddr {
+	#set -x
 	[[ $# -eq 0 ]] && return
 
 	typeset -i level="0"
-	[[ ! -e "$1" ]] && [[ -z "$(\type -P "$1")" ]] && {
-		level="$1"
-		shift
-	}
+	# If the first element is not a file, try to be smart
+	if [[ $# -gt 1 ]] && ! [[ -e "$1" ]]; then
+		# Pure number, it's our depth level
+		if [[ -z "${1//[0-9]}" ]]; then
+			level="$1"
+			shift
+		# a very simple option handling
+		elif [[ "${1:0:1}" == "-" ]]; then
+			case $1 in
+				-u)  __LDDR_DEPS_UNIQ=1 ; shift ;;
+				*)   echo >&2 "Usage: $FUNCNAME [-u] <binary> [binary...]" ; exit 1 ;;
+			esac
+		fi
+	fi
 	typeset pad="$(charrepeat $(($level * 4)) )"
 	level="$(($level + 1))"
 
+	typeset file
 	for file in "$@"; do
+		# Try to find in PATH
+		if ! [[ -s "$file" ]]; then
+			file="$(type -P "$file")"
+		fi
+
 		# Try to get the real binary
 		typeset realbin="$(realpath "$file")"
 
 		# First level is invocking one
 		[[ "$level" == "1" ]] && {
 			printf "== %s (%s)\n" "$file" "$realbin"
+			__LDDR_DEPS_FOUND=()
 		}
 
+		typeset lib
 		for lib in $(_ldd "$realbin"); do
+			# Check if uniqness is requested
+			if [[ "$__LDDR_DEPS_UNIQ" == "1" ]]; then
+				typeset cksum="$(echo "$lib"|cksum "-")"
+				cksum="${cksum%% *}"
+				if [[ -n "${__LDDR_DEPS_FOUND[$cksum]}" ]]; then
+					continue
+				else
+					__LDDR_DEPS_FOUND[$cksum]=1
+				fi
+			fi
+
+
 			printf "%s  %s\n" "$pad" "$lib"
-			lddr "$level" "$lib"
+			$FUNCNAME "$level" "$lib"
 		done
 	done
+
+	if [[ "$level" == "1" ]]; then
+		__LDDR_DEPS_UNIQ=0
+	fi
 }
 
 ###########################################################
