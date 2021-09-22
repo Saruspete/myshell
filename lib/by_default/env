@@ -124,4 +124,10 @@ function lastop {
 # Z (https://github.com/rupa/z)
 if [[ -s "$MYSHELL_BIN/z.sh" ]]; then
 	source "$MYSHELL_BIN/z.sh"
+
+	function z_promptfunc {
+		_z --add "$(command pwd -P 2>/dev/null)" 2>/dev/null
+	}
+
+	mys_promptfunc_register "z_promptfunc"
 fi
