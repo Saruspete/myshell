@@ -115,6 +115,7 @@ function __powerline_parse_git_status_v2 {
 	typeset ab
 	typeset detached=
 
+	typeset line
 	while read line ; do
 		# If line starts with '# ', it's branch info
 		if [ -z "${line### branch.*}" ] ; then
@@ -154,9 +155,11 @@ function __powerline_parse_git_status_v1 {
 	__powerline_split $'\n' "$status"
 	typeset lines=("${__powerline_retval[@]}")
 
+	typeset line
 	for line in "${lines[@]}" ; do
 		if [ "${line}" = "## HEAD (no branch)" ] ; then
 			detached=1
+			typeset desc
 			if desc="$(git describe --tags --abbrev=7 2>/dev/null)" ; then
 				branch="${desc}"
 			else
