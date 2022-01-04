@@ -1,4 +1,5 @@
 .initialized
+.reload
 local
 *.swa
 *.swp
