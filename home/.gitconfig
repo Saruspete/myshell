@@ -87,6 +87,12 @@
 [core]
 	# Don't escape UTF8 chars to their hex value
 	quotepath = false
+
+	excludesfile = ~/.gitignore-global
+
 [gc]
 	# Create cache commit-graph to speedup large projects
 	writeCommitGraph = true
+
+[init]
+	defaultBranch = master
