@@ -8,6 +8,7 @@ ssh_agent_start () {
 	# Do a basic lock
 	[ -s "$lockfile" ] && {
 		echo "Lockfile $lockfile exists. Waiting $locktime secs for release"
+		typeset -i i=0
 		for i in $(seq $locktime); do
 			[ -e "$lockfile" ] || break
 			sleep 1
