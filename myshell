@@ -367,7 +367,7 @@ mys_path_binadd "$MYSHELL_BIN"
 
 # Domains
 mys_hostname="$(uname -n)"
-mys_hostfqdn="$(getent hosts $mys_hostname|awk 'END{print $2}')"
+mys_hostfqdn="$(getent ahosts $mys_hostname| { read a t n; echo "$n"; } )"
 mys_hostdom="${mys_hostfqdn#*.}"
 if [ "$mys_hostdom" = "$mys_hostfqdn" ]; then
 	mys_hostdom=""
