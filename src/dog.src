@@ -27,4 +27,4 @@ typeset DST_ARCHTMP="$(ammHttp::FetchSmart "$SRC_URL")"
 [[ -s "$DST_ARCHTMP" ]] || ammLog::Die "Unable to download archive '$SRC_URL' into temp '$DST_ARCHTMP'"
 
 # Extract binary
-unzip -d "$DST_PATH" -j "$DST_ARCHTMP" bin/dog
+unzip -jo -d "$DST_PATH" "$DST_ARCHTMP"  bin/dog
