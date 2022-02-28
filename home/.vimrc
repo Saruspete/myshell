@@ -670,4 +670,5 @@ call ChangeAccentColor()
 
 
 
-" -----------------------------------------------------------------------------
+" Load pathogen
+execute pathogen#infect()

@@ -1,3 +1,6 @@
 [submodule "ammlib"]
 	path = ammlib
 	url = https://github.com/Saruspete/ammlib.git
+[submodule "home/.vim/bundle/vim-puppet"]
+	path = home/.vim/bundle/vim-puppet
+	url = https://github.com/rodjek/vim-puppet
