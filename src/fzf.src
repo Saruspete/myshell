@@ -22,7 +22,7 @@ typeset SRC_VERS="$(ammHttp::GithubReleaseGetLatest "$SRC_GHPRJ")"
 [[ -z "$SRC_VERS" ]] && ammLog::Die "Unable to fetch source version from github"
 
 typeset SRC_ARCHIVE="${SRC_NAME}-${SRC_VERS}.tar.gz"
-typeset SRC_URL="https://github.com/${SRC_GHPRJ}-bin/releases/download/${SRC_VERS}/fzf-${SRC_VERS}-linux_amd64.tgz"
+typeset SRC_URL="https://github.com/${SRC_GHPRJ}/releases/download/${SRC_VERS}/fzf-${SRC_VERS}-linux_amd64.tar.gz"
 
 # Download archive
 typeset DST_ARCHTMP="$(ammHttp::FetchSmart "$SRC_URL")"
