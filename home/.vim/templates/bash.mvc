@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+# MVC-AMMLib Header start
+typeset MYSELF="$(realpath $0)"
+typeset MYPATH="${MYSELF%/*}"
+
+# Load main library
+typeset -a ammpaths=("$MYPATH/ammlib" "${MVC_ROOT:-$HOME/mvc}/mvc-ammlib")
+for ammpath in "${ammpaths[@]}" fail; do
+	[[ -e "$ammpath/mvclib" ]] && source "$ammpath/mvclib" && break
+done
+if [[ "$ammpath" == "fail" ]]; then
+	echo >&2 "Unable to find ammlib in paths '${ammpaths[@]}'"
+	echo >&2 "It must be provided by the MVC framework. Please re-run bootstrap.sh"
+	exit 1
+fi
+# MVC-AMMLib Header end
+
+
+# Load the required libraries
+ammLib::Require "optparse"

@@ -133,9 +133,11 @@ cmap <f29> <nop>
 nnoremap <space> za
 
 " Skeletton
-au BufNewFile *.sh 0r ~/.vim/templates/bash.skel
-au BufNewFile *.spec 0r ~/.vim/templates/rpmspec.skel
+au BufNewFile *.sh 0r ~/.vim/templates/bash
+au BufNewFile *.spec 0r ~/.vim/templates/rpmspec
 
+" Specific versions 
+au BufNewFile */mvc-private/**.sh %delete | 0r ~/.vim/templates/bash.mvc
 
 "
 " Custom backup and swap files
