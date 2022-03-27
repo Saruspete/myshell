@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+set -o nounset
+set -o noclobber
+
+typeset MYSELF="$(readlink -f $0)"
+typeset MYPATH="${MYSELF%/*}"
+
+source "$MYPATH/_common"
+
+ammLib::Require http
+
+typeset SRC_GHPRJ="bcicen/ctop"
+
+typeset DST_PATH="$MYPATH/../bin"
+typeset DST_VERS=""
+
+# Query GH for latest version
+typeset SRC_VERS="$(ammHttp::GithubReleaseGetLatest "$SRC_GHPRJ")"
+[[ -z "$SRC_VERS" ]] && ammLog::Die "Unable to fetch source version from github"
+
+#typeset SRC_ARCHIVE="angle_grinder-${SRC_VERS}-x86_64-unknown-linux-musl.tar.gz"
+typeset SRC_BIN="ctop-0.7.7-linux-amd64"
+typeset SRC_URL="https://github.com/${SRC_GHPRJ}/releases/download/${SRC_VERS}/${SRC_BIN}"
+
+# Download archive
+typeset DST_BINTMP="$(ammHttp::FetchSmart "$SRC_URL")"
+[[ -s "$DST_BINTMP" ]] || ammLog::Die "Unable to download archive '$SRC_URL' into temp '$DST_BINTMP'"
+
+typeset DST_BINPATH="$DST_PATH/${SRC_BIN%%-*}"
+mv "$DST_BINTMP" "$DST_BINPATH"
+chmod +x "$DST_BINPATH"
+
+ammLog::Info "Installed under '$DST_BINPATH'"
