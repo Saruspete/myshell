@@ -35,6 +35,9 @@ alias ......="cd ../../../../.."
 
 alias ytdl="youtube-dl -f '[height<=720]'"
 
+alias psa="ps auxf"
+alias psg="ps auxf | grep"
+
 
 # Override RM to protect critical folders. Regex
 typeset -gxa MYS_RM_PROTECT=(
