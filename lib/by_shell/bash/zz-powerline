@@ -467,7 +467,22 @@ function __powerline_segment_cmdtime {
 	# Using myshell pre-exec time
 	if [[ -n "${MYS_PREEXECTIME:-}" ]]; then
 		typeset -i time_sec="$((${SECONDS:-$(date +%s)} - $MYS_PREEXECTIME))"
-		__powerline_retval=("p:48;5;25:38;5;220:${POWERLINE_CLOCKRUN_ICON-}:${time_sec}s")
+		typeset time_str=""
+		if [[ $time_sec -gt 86400 ]]; then
+			time_str+="$(( $time_sec / 86400 ))d "
+			time_sec="$(( $time_sec % 86400 ))"
+		fi
+		if [[ $time_sec -gt 3600 ]]; then
+			time_str+="$(( $time_sec / 3600))h "
+			time_sec="$(( $time_sec % 3600 ))"
+		fi
+		if [[ $time_sec -gt 60 ]]; then
+			time_str+="$(( $time_sec / 60))m "
+			time_sec="$(( $time_sec % 60 ))"
+		fi
+		time_str+="${time_sec}s"
+
+		__powerline_retval=("p:48;5;25:38;5;220:${POWERLINE_CLOCKRUN_ICON-}:${time_str}")
 		return
 	fi
 }
