@@ -15,7 +15,8 @@
 " Global behaviour
 set nocompatible
 "set mouse=nv " Mouse enabled in normal + visual
-set mouse=v " Mouse enabled in normal + visual
+"set mouse=v " Mouse enabled in normal + visual
+set mouse=  " Mouse disabled
 set modeline " Read header in files
 set ttyfast " Faster redraw
 set shortmess+=I " No intro
