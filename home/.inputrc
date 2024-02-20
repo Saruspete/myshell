@@ -6,3 +6,4 @@ set bell-style visible
 "\e[B": history-search-forward
 set show-all-if-ambiguous on
 set completion-ignore-case on
+set colored-completion-prefix on
