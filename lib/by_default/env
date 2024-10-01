@@ -33,7 +33,8 @@ alias ....="cd ../../.."
 alias .....="cd ../../../.."
 alias ......="cd ../../../../.."
 
-alias ytdl="youtube-dl -f '[height<=720]'"
+alias ytdl="yt-dlp --ignore-errors --embed-thumbnail --restrict-filenames -4 --trim-filenames 120"
+alias ytdl720="ytdl -f '[height<=720]'"
 
 alias psa="ps auxf"
 alias psg="ps auxf | grep"
@@ -129,7 +130,12 @@ if [[ -s "$MYSHELL_BIN/z.sh" ]]; then
 	source "$MYSHELL_BIN/z.sh"
 
 	function z_promptfunc {
-		_z --add "$(command pwd -P 2>/dev/null)" 2>/dev/null
+		typeset ptrn="" path="$(command pwd -P 2>/dev/null)"
+		while read ptrn; do
+			[[ "${path#$ptrn}" != "$path" ]] && return
+		done < <(\cat "$HOME/.z.ignore" 2>/dev/null)
+
+		_z --add "$path" 2>/dev/null
 	}
 
 	mys_promptfunc_register "z_promptfunc"
