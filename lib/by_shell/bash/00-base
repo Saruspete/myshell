@@ -3,7 +3,7 @@
 #
 # History
 #
-export HISTSIZE=9999
+export HISTSIZE=999999
 export HISTTIMEFORMAT="[ %F %T ] "
 export HISTCONTROL=ignorespace,erasedups
 #export HISTIGNORE
